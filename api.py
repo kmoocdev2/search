@@ -77,19 +77,17 @@ def course_discovery_search(search_term=None, size=20, from_=0, field_dictionary
     use_field_dictionary.update({field: search_fields[field] for field in search_fields if field in use_search_fields})
 
     # --------------- adding --------------- #
-    if 'range' in field_dictionary:
-        range_val = field_dictionary['range']
-        del(field_dictionary['range'])
- 
-        if range_val == 'i':
-            ''' 개강중:  start가 현재보다 작고 end가 없거나 현재보다 큰경우 '''
-            use_field_dictionary['start'] = DateRange(None, datetime.utcnow())
-            use_field_dictionary['end'] = DateRange(datetime.utcnow(), None)
-        elif range_val == 'e':
-            ''' 개강 종료'''
-            use_field_dictionary['end'] = DateRange(None, datetime.utcnow())
-        elif range_val == 't':
-            use_field_dictionary['start'] = DateRange(datetime.utcnow(), None)
+    if 'range' in field_dictionary:
+        range_val = field_dictionary['range']
+        del(field_dictionary['range'])
+
+        if range_val == 'i':
+            use_field_dictionary['start'] = DateRange(None, datetime.utcnow())
+            use_field_dictionary['end'] = DateRange(datetime.utcnow(), None)
+        elif range_val == 'e':
+            use_field_dictionary['end'] = DateRange(None, datetime.utcnow())
+        elif range_val == 't':
+            use_field_dictionary['start'] = DateRange(datetime.utcnow(), None)
     # --------------- adding --------------- #
 
     if field_dictionary:
