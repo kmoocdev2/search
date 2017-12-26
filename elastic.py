@@ -546,7 +546,8 @@ class ElasticSearchEngine(SearchEngine):
         if query_string:
             elastic_queries.append({
                 "query_string": {
-                    "fields": ["content.*"],
+                    "fields": ["display_name^4", "number", "short_description^2"],
+                    #"fields": ["content.*"],
                     "query": query_string.encode('utf-8').translate(None, RESERVED_CHARACTERS)
                 }
             })
@@ -595,7 +596,8 @@ class ElasticSearchEngine(SearchEngine):
                 }
             }
 
-        body = {"query": query}
+        #body = {"query": query}
+        body = {"sort":["_score"], "query": query}
         if facet_terms:
             facet_query = _process_facet_terms(facet_terms)
             if facet_query:

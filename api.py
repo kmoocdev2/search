@@ -9,8 +9,8 @@ from .result_processor import SearchResultProcessor
 from .utils import DateRange
 
 # Default filters that we support, override using COURSE_DISCOVERY_FILTERS setting if desired
-DEFAULT_FILTER_FIELDS = ["org", "modes", "language"]
-
+#DEFAULT_FILTER_FIELDS = ["org", "modes", "language"]
+DEFAULT_FILTER_FIELDS = ["org", "modes", "language", "classfy", "middle_classfy", "linguistics"]
 
 def course_discovery_filter_fields():
     """ look up the desired list of course discovery filter fields """
@@ -75,6 +75,23 @@ def course_discovery_search(search_term=None, size=20, from_=0, field_dictionary
     (search_fields, _, exclude_dictionary) = SearchFilterGenerator.generate_field_filters()
     use_field_dictionary = {}
     use_field_dictionary.update({field: search_fields[field] for field in search_fields if field in use_search_fields})
+
+    # --------------- adding --------------- #
+    if 'range' in field_dictionary:
+        range_val = field_dictionary['range']
+        del(field_dictionary['range'])
+ 
+        if range_val == 'i':
+            ''' 개강중:  start가 현재보다 작고 end가 없거나 현재보다 큰경우 '''
+            use_field_dictionary['start'] = DateRange(None, datetime.utcnow())
+            use_field_dictionary['end'] = DateRange(datetime.utcnow(), None)
+        elif range_val == 'e':
+            ''' 개강 종료'''
+            use_field_dictionary['end'] = DateRange(None, datetime.utcnow())
+        elif range_val == 't':
+            use_field_dictionary['start'] = DateRange(datetime.utcnow(), None)
+    # --------------- adding --------------- #
+
     if field_dictionary:
         use_field_dictionary.update(field_dictionary)
     if not getattr(settings, "SEARCH_SKIP_ENROLLMENT_START_DATE_FILTERING", False):
