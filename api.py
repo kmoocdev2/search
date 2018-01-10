@@ -10,7 +10,7 @@ from .utils import DateRange
 
 # Default filters that we support, override using COURSE_DISCOVERY_FILTERS setting if desired
 #DEFAULT_FILTER_FIELDS = ["org", "modes", "language"]
-DEFAULT_FILTER_FIELDS = ["org", "modes", "language", "classfy", "middle_classfy", "linguistics"]
+DEFAULT_FILTER_FIELDS = ["org", "modes", "language", "classfy", "middle_classfy", "middle_classfysub", "linguistics"]
 
 def course_discovery_filter_fields():
     """ look up the desired list of course discovery filter fields """
@@ -89,11 +89,26 @@ def course_discovery_search(search_term=None, size=20, from_=0, field_dictionary
         elif range_val == 't':
             use_field_dictionary['start'] = DateRange(datetime.utcnow(), None)
     # --------------- adding --------------- #
+    if 'middle_classfy' in field_dictionary:
+        middle_classfy_val = field_dictionary['middle_classfy']
+        del (field_dictionary['middle_classfy'])
+        #use_field_dictionary['middle_classfysub'] = middle_classfy_val
+    else:
+        middle_classfy_val = ''
+    # --------------- adding --------------- #
 
     if field_dictionary:
         use_field_dictionary.update(field_dictionary)
     if not getattr(settings, "SEARCH_SKIP_ENROLLMENT_START_DATE_FILTERING", False):
         use_field_dictionary["enrollment_start"] = DateRange(None, datetime.utcnow())
+
+    if 'pagepos' in field_dictionary:
+        pagepos_val = field_dictionary['pagepos']
+    else:
+        pagepos_val = ''
+   
+    #test l : list, d : detail
+    pagepos_val = 'l'
 
     searcher = SearchEngine.get_search_engine(getattr(settings, "COURSEWARE_INDEX_NAME", "courseware_index"))
     if not searcher:
@@ -109,7 +124,10 @@ def course_discovery_search(search_term=None, size=20, from_=0, field_dictionary
         # show if no enrollment end is provided and has not yet been reached
         filter_dictionary={"enrollment_end": DateRange(datetime.utcnow(), None)},
         exclude_dictionary=exclude_dictionary,
+        pagepos=pagepos_val,
+        middle_classfysub=middle_classfy_val,
         facet_terms=course_discovery_facets(),
     )
 
     return results
+

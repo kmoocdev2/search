@@ -615,3 +615,134 @@ class ElasticSearchEngine(SearchEngine):
             raise
 
         return _translate_hits(es_response)
+
+    # search method override : add parameter pagepos
+    def search(self,
+               query_string=None,
+               field_dictionary=None,
+               filter_dictionary=None,
+               exclude_dictionary=None,
+               facet_terms=None,
+               exclude_ids=None,
+               pagepos=None,
+               middle_classfysub=None,
+               use_field_match=False,
+               **kwargs):  # pylint: disable=too-many-arguments, too-many-locals, too-many-branches
+
+        log.debug("searching index with %s", query_string)
+
+        elastic_queries = []
+        elastic_filters = []
+
+        # We have a query string, search all fields for matching text within the "content" node
+        if query_string:
+            elastic_queries.append({
+                "query_string": {
+                    "fields": ["display_name^4", "number", "short_description^2"],
+                    #"fields": ["content.*"],
+                    "query": query_string.encode('utf-8').translate(None, RESERVED_CHARACTERS)
+                }
+            })
+
+        if field_dictionary:
+            if use_field_match:
+                elastic_queries.extend(_process_field_queries(field_dictionary))
+            else:
+                elastic_filters.extend(_process_field_filters(field_dictionary))
+
+        if filter_dictionary:
+            elastic_filters.extend(_process_filters(filter_dictionary))
+
+        # Support deprecated argument of exclude_ids
+        if exclude_ids:
+            if not exclude_dictionary:
+                exclude_dictionary = {}
+            if "_id" not in exclude_dictionary:
+                exclude_dictionary["_id"] = []
+            exclude_dictionary["_id"].extend(exclude_ids)
+
+        if exclude_dictionary:
+            elastic_filters.append(_process_exclude_dictionary(exclude_dictionary))
+
+        query_segment = {
+            "match_all": {}
+        }
+
+        query_sub_segment = {}
+        if pagepos == 'l':
+            query_sub_segment = {
+                    "term": {"catalog_visibility": "none about"}
+            }
+        elif pagepos == 'd':
+            query_sub_segment = {
+                    "term": {"catalog_visibility": "none"}
+            }
+
+        if elastic_queries:
+            query_segment = {
+                "bool": {
+                    "must": elastic_queries
+                }
+            }
+
+        query = query_segment
+
+        if elastic_filters:
+            if middle_classfysub != '':
+                filter_segment = {
+                    "bool": {
+                        "should": [{ "term": {"middle_classfy": middle_classfysub} },{ "term": {"middle_classfysub": middle_classfysub} }],
+                        #"must_not": {"term":{"catalog_visibility": "none"}},
+                        "must_not": query_sub_segment,
+                        "must": elastic_filters
+                    }
+                }
+            else:
+                filter_segment = {
+                    "bool": {
+                        #"must_not": {"term":{"catalog_visibility": "none"}},
+                        "must_not": query_sub_segment,
+                        "must": elastic_filters
+                    }
+                }
+
+        if pagepos != '' and pagepos != None:
+
+            if elastic_filters:
+                query = {
+                    "filtered": {
+                        "query": query_segment,
+                        "filter": filter_segment,
+                        #"query": query_sub_segment,
+                    }
+                }
+
+        else:
+            if elastic_filters:
+                query = {
+                    "filtered": {
+                        "query": query_segment,
+                        "filter": filter_segment,
+                    }
+                }
+
+        #body = {"query": query}
+        body = {"sort":["_score"], "query": query}
+
+        if facet_terms:
+            facet_query = _process_facet_terms(facet_terms)
+            if facet_query:
+                body["facets"] = facet_query
+
+        try:
+            es_response = self._es.search(
+                index=self.index_name,
+                body=body,
+                **kwargs
+            )
+        except exceptions.ElasticsearchException as ex:
+            # log information and re-raise
+            log.exception("error while searching index - %s", ex.message)
+            raise
+
+        return _translate_hits(es_response)
