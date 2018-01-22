@@ -689,22 +689,50 @@ class ElasticSearchEngine(SearchEngine):
 
         if elastic_filters:
             if middle_classfysub != '':
-                filter_segment = {
-                    "bool": {
-                        "should": [{ "term": {"middle_classfy": middle_classfysub} },{ "term": {"middle_classfysub": middle_classfysub} }],
-                        #"must_not": {"term":{"catalog_visibility": "none"}},
-                        "must_not": query_sub_segment,
-                        "must": elastic_filters
-                    }
-                }
+                if len(query_sub_segment)>0:
+                    if middle_classfysub != None and len(middle_classfysub)>0:
+                        filter_segment = {
+                            "bool": {
+                                "should": [{ "term": {"middle_classfy": middle_classfysub} },{ "term": {"middle_classfysub": middle_classfysub} }],
+                                "must_not": query_sub_segment,
+                                "must": elastic_filters
+                            }
+                        }
+                    else:
+                        filter_segment = {
+                            "bool": {
+                                "must_not": query_sub_segment,
+                                "must": elastic_filters
+                            }
+                        }
+                else:
+                    if middle_classfysub != None and len(middle_classfysub)>0:
+                        filter_segment = {
+                            "bool": {
+                                "should": [{ "term": {"middle_classfy": middle_classfysub} },{ "term": {"middle_classfysub": middle_classfysub} }],
+                                "must": elastic_filters
+                            }
+                        }
+                    else:
+                        filter_segment = {
+                            "bool": {
+                                "must": elastic_filters
+                            }
+                        }
             else:
-                filter_segment = {
-                    "bool": {
-                        #"must_not": {"term":{"catalog_visibility": "none"}},
-                        "must_not": query_sub_segment,
-                        "must": elastic_filters
+                if len(query_sub_segment)>0:
+                    filter_segment = {
+                        "bool": {
+                            "must_not": query_sub_segment,
+                            "must": elastic_filters
+                        }
                     }
-                }
+                else:
+                    filter_segment = {
+                        "bool": {
+                            "must": elastic_filters
+                        }
+                    }
 
         if pagepos != '' and pagepos != None:
 
@@ -713,7 +741,6 @@ class ElasticSearchEngine(SearchEngine):
                     "filtered": {
                         "query": query_segment,
                         "filter": filter_segment,
-                        #"query": query_sub_segment,
                     }
                 }
 
