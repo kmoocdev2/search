@@ -691,6 +691,7 @@ class ElasticSearchEngine(SearchEngine):
             if middle_classfysub != '':
                 if len(query_sub_segment)>0:
                     if middle_classfysub != None and len(middle_classfysub)>0:
+                        middle_classfysub.replace(',',' ')
                         filter_segment = {
                             "bool": {
                                 "should": [{ "term": {"middle_classfy": middle_classfysub} },{ "term": {"middle_classfysub": middle_classfysub} }],
@@ -707,6 +708,7 @@ class ElasticSearchEngine(SearchEngine):
                         }
                 else:
                     if middle_classfysub != None and len(middle_classfysub)>0:
+                        middle_classfysub.replace(',',' ')
                         filter_segment = {
                             "bool": {
                                 "should": [{ "term": {"middle_classfy": middle_classfysub} },{ "term": {"middle_classfysub": middle_classfysub} }],
