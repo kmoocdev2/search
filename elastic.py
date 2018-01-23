@@ -668,6 +668,8 @@ class ElasticSearchEngine(SearchEngine):
             "match_all": {}
         }
 
+        # "term": {"catalog_visibility": "none about"}
+        # [{"term": {"catalog_visibility": "none"}}, {"term": {"catalog_visibility": "about"}}]
         query_sub_segment = {}
         if pagepos == 'l':
             query_sub_segment = {
@@ -692,17 +694,19 @@ class ElasticSearchEngine(SearchEngine):
                 if len(query_sub_segment)>0:
                     if middle_classfysub != None and len(middle_classfysub)>0:
                         middle_classfysub.replace(',',' ')
+                                # "must_not": query_sub_segment,
                         filter_segment = {
                             "bool": {
                                 "should": [{ "term": {"middle_classfy": middle_classfysub} },{ "term": {"middle_classfysub": middle_classfysub} }],
-                                "must_not": query_sub_segment,
+                                "must_not": [{"term": {"catalog_visibility": "none"}}, {"term": {"catalog_visibility": "about"}}],
                                 "must": elastic_filters
                             }
                         }
                     else:
+                                # "must_not": query_sub_segment,
                         filter_segment = {
                             "bool": {
-                                "must_not": query_sub_segment,
+                                "must_not": [{"term": {"catalog_visibility": "none"}}, {"term": {"catalog_visibility": "about"}}],
                                 "must": elastic_filters
                             }
                         }
@@ -723,9 +727,10 @@ class ElasticSearchEngine(SearchEngine):
                         }
             else:
                 if len(query_sub_segment)>0:
+                            # "must_not": query_sub_segment,
                     filter_segment = {
                         "bool": {
-                            "must_not": query_sub_segment,
+                            "must_not": [{"term": {"catalog_visibility": "none"}}, {"term": {"catalog_visibility": "about"}}],
                             "must": elastic_filters
                         }
                     }
