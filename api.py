@@ -10,7 +10,7 @@ from .utils import DateRange
 
 # Default filters that we support, override using COURSE_DISCOVERY_FILTERS setting if desired
 #DEFAULT_FILTER_FIELDS = ["org", "modes", "language"]
-DEFAULT_FILTER_FIELDS = ["org", "modes", "language", "classfy", "middle_classfy", "middle_classfysub", "linguistics"]
+DEFAULT_FILTER_FIELDS = ["org", "modes", "language", "classfy", "classfysub", "middle_classfy", "middle_classfysub", "linguistics"]
 
 def course_discovery_filter_fields():
     """ look up the desired list of course discovery filter fields """
@@ -19,7 +19,9 @@ def course_discovery_filter_fields():
 
 def course_discovery_facets():
     """ Discovery facets to include, by default we specify each filter field with unspecified size attribute """
-    return getattr(settings, "COURSE_DISCOVERY_FACETS", {field: {} for field in course_discovery_filter_fields()})
+    facets = ['org', 'language', 'modes', 'classfy', 'middle_classfy', 'classfysub', 'middle_classfysub', 'linguistics', 'range', 'course_period']
+    return getattr(settings, "COURSE_DISCOVERY_FACETS", {field: {} for field in facets})
+    # return getattr(settings, "COURSE_DISCOVERY_FACETS", {field: {} for field in course_discovery_filter_fields()})
 
 
 class NoSearchEngineError(Exception):
@@ -89,10 +91,15 @@ def course_discovery_search(search_term=None, size=20, from_=0, field_dictionary
         elif range_val == 't':
             use_field_dictionary['start'] = DateRange(datetime.utcnow(), None)
     # --------------- adding --------------- #
+    if 'classfy' in field_dictionary:
+        classfy_val = field_dictionary['classfy']
+        del (field_dictionary['classfy'])
+    else:
+        classfy_val = ''
+
     if 'middle_classfy' in field_dictionary:
         middle_classfy_val = field_dictionary['middle_classfy']
         del (field_dictionary['middle_classfy'])
-        #use_field_dictionary['middle_classfysub'] = middle_classfy_val
     else:
         middle_classfy_val = ''
     # --------------- adding --------------- #
@@ -125,6 +132,7 @@ def course_discovery_search(search_term=None, size=20, from_=0, field_dictionary
         filter_dictionary={"enrollment_end": DateRange(datetime.utcnow(), None)},
         exclude_dictionary=exclude_dictionary,
         pagepos=pagepos_val,
+        classfysub=classfy_val,
         middle_classfysub=middle_classfy_val,
         facet_terms=course_discovery_facets(),
     )

@@ -546,7 +546,7 @@ class ElasticSearchEngine(SearchEngine):
         if query_string:
             elastic_queries.append({
                 "query_string": {
-                    "fields": ["display_name^4", "number", "short_description^2"],
+                    "fields": ["display_name^4", "number", "short_description^2", "overview^0.2"],
                     #"fields": ["content.*"],
                     "query": query_string.encode('utf-8').translate(None, RESERVED_CHARACTERS)
                 }
@@ -625,6 +625,7 @@ class ElasticSearchEngine(SearchEngine):
                facet_terms=None,
                exclude_ids=None,
                pagepos=None,
+               classfysub=None,
                middle_classfysub=None,
                use_field_match=False,
                **kwargs):  # pylint: disable=too-many-arguments, too-many-locals, too-many-branches
@@ -638,7 +639,7 @@ class ElasticSearchEngine(SearchEngine):
         if query_string:
             elastic_queries.append({
                 "query_string": {
-                    "fields": ["display_name^4", "number", "short_description^2"],
+                    "fields": ["display_name^4", "number", "short_description^2", "overview^0.2"],
                     #"fields": ["content.*"],
                     "query": query_string.encode('utf-8').translate(None, RESERVED_CHARACTERS)
                 }
@@ -690,20 +691,19 @@ class ElasticSearchEngine(SearchEngine):
         query = query_segment
 
         if elastic_filters:
-            if middle_classfysub != '':
+            if classfysub != None and classfysub != '' and middle_classfysub != None and middle_classfysub != '':
                 if len(query_sub_segment)>0:
-                    if middle_classfysub != None and len(middle_classfysub)>0:
+                    if len(classfysub)>0 and len(middle_classfysub) > 0:
+                        classfysub.replace(',',' ')
                         middle_classfysub.replace(',',' ')
-                                # "must_not": query_sub_segment,
                         filter_segment = {
                             "bool": {
-                                "should": [{ "term": {"middle_classfy": middle_classfysub} },{ "term": {"middle_classfysub": middle_classfysub} }],
+                                "should": [{"term": {"classfy": classfysub}}, {"term": {"classfysub": classfysub} }, {"term": {"middle_classfy": middle_classfysub}}, {"term": {"middle_classfysub": middle_classfysub}}],
                                 "must_not": [{"term": {"catalog_visibility": "none"}}, {"term": {"catalog_visibility": "about"}}],
                                 "must": elastic_filters
                             }
                         }
                     else:
-                                # "must_not": query_sub_segment,
                         filter_segment = {
                             "bool": {
                                 "must_not": [{"term": {"catalog_visibility": "none"}}, {"term": {"catalog_visibility": "about"}}],
@@ -711,11 +711,78 @@ class ElasticSearchEngine(SearchEngine):
                             }
                         }
                 else:
-                    if middle_classfysub != None and len(middle_classfysub)>0:
+                    if len(classfysub)>0 and len(middle_classfysub) > 0:
+                        classfysub.replace(',',' ')
                         middle_classfysub.replace(',',' ')
                         filter_segment = {
                             "bool": {
-                                "should": [{ "term": {"middle_classfy": middle_classfysub} },{ "term": {"middle_classfysub": middle_classfysub} }],
+                                "should": [{"term": {"classfy": classfysub}}, {"term": {"classfysub": classfysub}}, {"term": {"middle_classfy": middle_classfysub}},{"term": {"middle_classfysub": middle_classfysub}}],
+                                "must": elastic_filters
+                            }
+                        }
+                    else:
+                        filter_segment = {
+                            "bool": {
+                                "must": elastic_filters
+                            }
+                        }
+            elif (classfysub == '' or classfysub == None) and (middle_classfysub != None and middle_classfysub != ''):
+                if len(query_sub_segment)>0:
+                    if len(middle_classfysub)>0:
+                        middle_classfysub.replace(',',' ')
+                        filter_segment = {
+                            "bool": {
+                                "should": [{"term": {"middle_classfy": middle_classfysub} },{ "term": {"middle_classfysub": middle_classfysub}}],
+                                "must_not": [{"term": {"catalog_visibility": "none"}}, {"term": {"catalog_visibility": "about"}}],
+                                "must": elastic_filters
+                            }
+                        }
+                    else:
+                        filter_segment = {
+                            "bool": {
+                                "must_not": [{"term": {"catalog_visibility": "none"}}, {"term": {"catalog_visibility": "about"}}],
+                                "must": elastic_filters
+                            }
+                        }
+                else:
+                    if len(middle_classfysub)>0:
+                        middle_classfysub.replace(',',' ')
+                        filter_segment = {
+                            "bool": {
+                                "should": [{"term": {"middle_classfy": middle_classfysub} },{ "term": {"middle_classfysub": middle_classfysub}}],
+                                "must": elastic_filters
+                            }
+                        }
+                    else:
+                        filter_segment = {
+                            "bool": {
+                                "must": elastic_filters
+                            }
+                        }
+            elif (middle_classfysub == '' or middle_classfysub == None) and (classfysub != None and classfysub != ''):
+                if len(query_sub_segment)>0:
+                    if len(classfysub)>0:
+                        classfysub.replace(',',' ')
+                        filter_segment = {
+                            "bool": {
+                                "should": [{"term": {"classfy": classfysub} },{ "term": {"classfysub": classfysub}}],
+                                "must_not": [{"term": {"catalog_visibility": "none"}}, {"term": {"catalog_visibility": "about"}}],
+                                "must": elastic_filters
+                            }
+                        }
+                    else:
+                        filter_segment = {
+                            "bool": {
+                                "must_not": [{"term": {"catalog_visibility": "none"}}, {"term": {"catalog_visibility": "about"}}],
+                                "must": elastic_filters
+                            }
+                        }
+                else:
+                    if len(classfysub)>0:
+                        classfysub.replace(',',' ')
+                        filter_segment = {
+                            "bool": {
+                                "should": [{"term": {"classfy": classfysub} },{ "term": {"classfysub": classfysub}}],
                                 "must": elastic_filters
                             }
                         }
@@ -727,7 +794,6 @@ class ElasticSearchEngine(SearchEngine):
                         }
             else:
                 if len(query_sub_segment)>0:
-                            # "must_not": query_sub_segment,
                     filter_segment = {
                         "bool": {
                             "must_not": [{"term": {"catalog_visibility": "none"}}, {"term": {"catalog_visibility": "about"}}],
@@ -741,8 +807,8 @@ class ElasticSearchEngine(SearchEngine):
                         }
                     }
 
-        if pagepos != '' and pagepos != None:
 
+        if pagepos != '' and pagepos != None:
             if elastic_filters:
                 query = {
                     "filtered": {
@@ -750,7 +816,6 @@ class ElasticSearchEngine(SearchEngine):
                         "filter": filter_segment,
                     }
                 }
-
         else:
             if elastic_filters:
                 query = {
