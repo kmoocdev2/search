@@ -1,8 +1,7 @@
+#-*- coding: utf-8 -*-
 """ search business logic implementations """
 from datetime import datetime
-
 from django.conf import settings
-
 from .filter_generator import SearchFilterGenerator
 from .search_engine_base import SearchEngine
 from .result_processor import SearchResultProcessor
@@ -10,7 +9,7 @@ from .utils import DateRange
 
 # Default filters that we support, override using COURSE_DISCOVERY_FILTERS setting if desired
 #DEFAULT_FILTER_FIELDS = ["org", "modes", "language"]
-DEFAULT_FILTER_FIELDS = ["org", "modes", "language", "classfy", "classfysub", "middle_classfy", "middle_classfysub", "linguistics"]
+DEFAULT_FILTER_FIELDS = ["org", "language", "modes", "classfy", "middle_classfy", "classfysub", "middle_classfysub", "linguistics", 'range', 'course_period']
 
 def course_discovery_filter_fields():
     """ look up the desired list of course discovery filter fields """
@@ -73,7 +72,8 @@ def course_discovery_search(search_term=None, size=20, from_=0, field_dictionary
     """
     # We'll ignore the course-enrollemnt informaiton in field and filter
     # dictionary, and use our own logic upon enrollment dates for these
-    use_search_fields = ["org"]
+    #use_search_fields = ["org"]
+    use_search_fields = ["org", "language", "modes", 'classfy', 'middle_classfy', 'classfysub', 'middle_classfysub', 'linguistics', 'range', 'course_period']
     (search_fields, _, exclude_dictionary) = SearchFilterGenerator.generate_field_filters()
     use_field_dictionary = {}
     use_field_dictionary.update({field: search_fields[field] for field in search_fields if field in use_search_fields})
@@ -129,7 +129,8 @@ def course_discovery_search(search_term=None, size=20, from_=0, field_dictionary
         # only show when enrollment start IS provided and is before now
         field_dictionary=use_field_dictionary,
         # show if no enrollment end is provided and has not yet been reached
-        filter_dictionary={"enrollment_end": DateRange(datetime.utcnow(), None)},
+        #filter_dictionary={"enrollment_end": DateRange(datetime.utcnow(), None)},
+        filter_dictionary={"enrollment_start": DateRange(None, datetime.utcnow())},
         exclude_dictionary=exclude_dictionary,
         pagepos=pagepos_val,
         classfysub=classfy_val,
