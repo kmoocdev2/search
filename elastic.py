@@ -639,7 +639,7 @@ class ElasticSearchEngine(SearchEngine):
         if query_string:
             elastic_queries.append({
                 "query_string": {
-                    "fields": ["display_name^4", "number", "short_description^2", "overview^0.2"],
+                    "fields": ["display_name^4", "number", "short_description^2", "overview^0.2", "start"],
                     #"fields": ["content.*"],
                     "query": query_string.encode('utf-8').translate(None, RESERVED_CHARACTERS)
                 }
@@ -826,7 +826,19 @@ class ElasticSearchEngine(SearchEngine):
                 }
 
         #body = {"query": query}
-        body = {"sort":["_score"], "query": query}
+        #body = {"sort":["_score"], "query": query}
+        #body = {"sort":[{"_score":{"order":"desc"}},{"start":{"order":"desc"}}], "query": query}
+
+        if kwargs is not None:
+            for key, value in kwargs.iteritems():
+                if key == "doc_type" and value == "courseware_content":
+                    print "%s == %s" % (key, value)
+                    body = {"sort": [{"_score": {"order": "desc"}}], "query": query}
+                    break
+                if key == "doc_type" and value == "course_info":
+                    print "%s == %s" % (key, value)
+                    body = {"sort": [{"_score": {"order": "desc"}}, {"start": {"order": "desc"}}], "query": query}
+                    break
 
         if facet_terms:
             facet_query = _process_facet_terms(facet_terms)
