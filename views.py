@@ -13,6 +13,7 @@ from django.views.decorators.http import require_POST
 from eventtracking import tracker as track
 from .api import perform_search, course_discovery_search, course_discovery_filter_fields
 from .initializer import SearchInitializer
+from django.db import connections
 
 # log appears to be standard name used for logger
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -194,6 +195,21 @@ def course_discovery(request):
             from_=from_,
             field_dictionary=field_dictionary,
         )
+
+        with connections['default'].cursor() as cur:
+            query = """
+                SELECT a.id, ifnull(b.audit_yn, "N")
+                  FROM course_overviews_courseoverview a
+                         LEFT JOIN course_overview_addinfo b ON a.id = b.course_id;
+            """
+            cur.execute(query)
+            course_audit = cur.fetchall()
+            cur.close()
+
+        for result in results['results']:
+            for c_audit in course_audit:
+                if result['data']['id'] == c_audit[0]:
+                    result['data']['audit_yn'] = c_audit[1]
 
         # Analytics - log search results before sending to browser
         track.emit(
