@@ -546,7 +546,7 @@ class ElasticSearchEngine(SearchEngine):
         if query_string:
             elastic_queries.append({
                 "query_string": {
-                    "fields": ["display_name^4", "number", "short_description^2", "overview^0.2"],
+                    "fields": ["display_name^4", "short_description^2", "number"],
                     #"fields": ["content.*"],
                     "query": query_string.encode('utf-8').translate(None, RESERVED_CHARACTERS)
                 }
@@ -639,7 +639,7 @@ class ElasticSearchEngine(SearchEngine):
         if query_string:
             elastic_queries.append({
                 "query_string": {
-                    "fields": ["display_name^4", "number", "short_description^2", "overview^0.2", "start"],
+                    "fields": ["display_name^4", "short_description^2", "number", "start"],
                     #"fields": ["content.*"],
                     "query": query_string.encode('utf-8').translate(None, RESERVED_CHARACTERS)
                 }
