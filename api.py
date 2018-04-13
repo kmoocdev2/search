@@ -19,7 +19,7 @@ def course_discovery_filter_fields():
 def course_discovery_facets():
     """ Discovery facets to include, by default we specify each filter field with unspecified size attribute """
     facets = ['org', 'language', 'modes', 'classfy', 'middle_classfy', 'classfysub', 'middle_classfysub', 'linguistics', 'range', 'course_period']
-    return getattr(settings, "COURSE_DISCOVERY_FACETS", {field: {} for field in facets})
+    return getattr(settings, "COURSE_DISCOVERY_FACETS", {field: {'size':'300'} for field in facets})
     # return getattr(settings, "COURSE_DISCOVERY_FACETS", {field: {} for field in course_discovery_filter_fields()})
 
 
