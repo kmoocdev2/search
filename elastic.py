@@ -696,16 +696,30 @@ class ElasticSearchEngine(SearchEngine):
                     if len(classfysub)>0 and len(middle_classfysub) > 0:
                         classfysub.replace(',',' ')
                         middle_classfysub.replace(',',' ')
+                        #filter_segment = {
+                        #    "bool": {
+                        #        "should": [{"term": {"classfy": classfysub}}, {"term": {"classfysub": classfysub} }, {"term": {"middle_classfy": middle_classfysub}}, {"term": {"middle_classfysub": middle_classfysub}}],
+                        #        "must_not": [{"term": {"catalog_visibility": "none"}}, {"term": {"catalog_visibility": "about"}}],
+                        #        "must": elastic_filters
+                        #    }
+                        #}
                         filter_segment = {
                             "bool": {
-                                "should": [{"term": {"classfy": classfysub}}, {"term": {"classfysub": classfysub} }, {"term": {"middle_classfy": middle_classfysub}}, {"term": {"middle_classfysub": middle_classfysub}}],
+                                "should": [{"term": {"middle_classfy": middle_classfysub}}, {"term": {"middle_classfysub": middle_classfysub}}],
                                 "must_not": [{"term": {"catalog_visibility": "none"}}, {"term": {"catalog_visibility": "about"}}],
                                 "must": elastic_filters
                             }
                         }
                     else:
+                        #filter_segment = {
+                        #    "bool": {
+                        #        "must_not": [{"term": {"catalog_visibility": "none"}}, {"term": {"catalog_visibility": "about"}}],
+                        #        "must": elastic_filters
+                        #    }
+                        #}
                         filter_segment = {
                             "bool": {
+                                "should": [{"term": {"middle_classfy": middle_classfysub}}, {"term": {"middle_classfysub": middle_classfysub}}],
                                 "must_not": [{"term": {"catalog_visibility": "none"}}, {"term": {"catalog_visibility": "about"}}],
                                 "must": elastic_filters
                             }
@@ -714,9 +728,15 @@ class ElasticSearchEngine(SearchEngine):
                     if len(classfysub)>0 and len(middle_classfysub) > 0:
                         classfysub.replace(',',' ')
                         middle_classfysub.replace(',',' ')
+                        #filter_segment = {
+                        #    "bool": {
+                        #        "should": [{"term": {"classfy": classfysub}}, {"term": {"classfysub": classfysub}}, {"term": {"middle_classfy": middle_classfysub}},{"term": {"middle_classfysub": middle_classfysub}}],
+                        #        "must": elastic_filters
+                        #    }
+                        #}
                         filter_segment = {
                             "bool": {
-                                "should": [{"term": {"classfy": classfysub}}, {"term": {"classfysub": classfysub}}, {"term": {"middle_classfy": middle_classfysub}},{"term": {"middle_classfysub": middle_classfysub}}],
+                                "should": [{"term": {"middle_classfy": middle_classfysub}},{"term":{"middle_classfysub": middle_classfysub}}],
                                 "must": elastic_filters
                             }
                         }
