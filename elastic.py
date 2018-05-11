@@ -99,7 +99,6 @@ def _process_field_queries(field_dictionary):
                 field: field_dictionary[field]
             }
         }
-
     return [field_item(field) for field in field_dictionary]
 
 
@@ -645,14 +644,34 @@ class ElasticSearchEngine(SearchEngine):
                 }
             })
 
+        #print ("elastic_queries: 0 -->",elastic_queries)
+
         if field_dictionary:
             if use_field_match:
+                #print "111111"
                 elastic_queries.extend(_process_field_queries(field_dictionary))
             else:
+                #print "222222"
                 elastic_filters.extend(_process_field_filters(field_dictionary))
+
+        #print ("elastic_queries: 1 -->",elastic_queries)
+        #print ("0", elastic_filters)
+
+        filter_field = None
+        range_datevalues = {}
+        range_datevalues.update({"lt": "2030-01-01T00:00:00.000000"})
+        #print ("range_datevalues", range_datevalues)
+        #filter_field = {"range": { "start": {"lt": "2030-01-01T00:00:00.000000"}}}
+        filter_field = {"range": {"start": range_datevalues}}
+        #print ("filter_field", filter_field)
+        elastic_filters.extend([filter_field])
+        #print ("1", elastic_filters)
+
 
         if filter_dictionary:
             elastic_filters.extend(_process_filters(filter_dictionary))
+
+        #print elastic_filters
 
         # Support deprecated argument of exclude_ids
         if exclude_ids:
@@ -868,5 +887,7 @@ class ElasticSearchEngine(SearchEngine):
             # log information and re-raise
             log.exception("error while searching index - %s", ex.message)
             raise
+
+        #print ("body:-->", body)
 
         return _translate_hits(es_response)

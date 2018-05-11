@@ -81,11 +81,16 @@ def course_discovery_search(search_term=None, size=20, from_=0, field_dictionary
     # --------------- adding --------------- #
     if 'range' in field_dictionary:
         range_val = field_dictionary['range']
+        
+        print ("range_val:",range_val)
+
         del(field_dictionary['range'])
 
         if range_val == 'i':
             use_field_dictionary['start'] = DateRange(None, datetime.utcnow())
             use_field_dictionary['end'] = DateRange(datetime.utcnow(), None)
+        elif range_val == 'a':
+            use_field_dictionary['audit_yn'] = 'Y'
         elif range_val == 'e':
             use_field_dictionary['end'] = DateRange(None, datetime.utcnow())
         elif range_val == 't':
