@@ -888,6 +888,6 @@ class ElasticSearchEngine(SearchEngine):
             log.exception("error while searching index - %s", ex.message)
             raise
 
-        #print ("body:-->", body)
+        print ("body:-->", body)
 
         return _translate_hits(es_response)
