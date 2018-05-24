@@ -659,7 +659,7 @@ class ElasticSearchEngine(SearchEngine):
 
         filter_field = None
         range_datevalues = {}
-        range_datevalues.update({"lt": "2030-01-01T00:00:00.000000"})
+        range_datevalues.update({"lt": "2030-01-01T00:00:00+00:00"})
         #print ("range_datevalues", range_datevalues)
         #filter_field = {"range": { "start": {"lt": "2030-01-01T00:00:00.000000"}}}
         filter_field = {"range": {"start": range_datevalues}}
