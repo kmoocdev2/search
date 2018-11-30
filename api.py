@@ -74,7 +74,7 @@ def course_discovery_search(search_term=None, size=20, from_=0, field_dictionary
     # We'll ignore the course-enrollemnt informaiton in field and filter
     # dictionary, and use our own logic upon enrollment dates for these
     #use_search_fields = ["org"]
-    use_search_fields = ["org", "language", "modes", 'classfy', 'middle_classfy', 'classfysub', 'middle_classfysub', 'linguistics', 'range', 'course_period', 'start']
+    use_search_fields = ["org", "language", "modes", 'classfy', 'middle_classfy', 'classfysub', 'middle_classfysub', 'linguistics', 'range', 'course_period', 'start','audit_yn']
     (search_fields, _, exclude_dictionary) = SearchFilterGenerator.generate_field_filters()
     use_field_dictionary = {}
     use_field_dictionary.update({field: search_fields[field] for field in search_fields if field in use_search_fields})
