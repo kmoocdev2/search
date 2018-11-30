@@ -5,7 +5,7 @@ from django.conf.urls import url
 from . import views
 
 COURSE_ID_PATTERN = getattr(settings, "COURSE_ID_PATTERN", r'(?P<course_id>[^/+]+(/|\+)[^/+]+(/|\+)[^/]+)')
-
+print ("COURSE_ID_PATTERN",COURSE_ID_PATTERN)
 # urlpatterns is the standard name to use here
 # pylint: disable=invalid-name
 urlpatterns = [
