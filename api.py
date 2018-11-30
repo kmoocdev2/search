@@ -67,6 +67,7 @@ def perform_search(
 
 
 def course_discovery_search(search_term=None, size=20, from_=0, field_dictionary=None):
+    print("course_discovery_search --start")
     """
     Course Discovery activities against the search engine index of course details
     """
@@ -77,7 +78,7 @@ def course_discovery_search(search_term=None, size=20, from_=0, field_dictionary
     (search_fields, _, exclude_dictionary) = SearchFilterGenerator.generate_field_filters()
     use_field_dictionary = {}
     use_field_dictionary.update({field: search_fields[field] for field in search_fields if field in use_search_fields})
-
+    print ("field_dictionary",field_dictionary)
     # --------------- adding --------------- #
     if 'range' in field_dictionary:
         range_val = field_dictionary['range']

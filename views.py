@@ -48,6 +48,7 @@ def _process_field_values(request):
 
 @require_POST
 def do_search(request, course_id=None):
+    print ("do_search. request -->",request)
     """
     Search view for http requests
 
@@ -146,6 +147,7 @@ def do_search(request, course_id=None):
 
 @require_POST
 def course_discovery(request):
+    print("course-dis request",request)
     """
     Search for courses
 
