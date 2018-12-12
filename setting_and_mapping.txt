@@ -1,0 +1,351 @@
+curl -XPOST 'edx.devstack.elasticsearch:9200/courseware_index/_close'
+
+curl -XDELETE 'edx.devstack.elasticsearch:9200/courseware_index'
+
+curl -XPUT 'edx.devstack.elasticsearch:9200/courseware_index?pretty' -d'
+{
+    "settings" : {
+        "index" : {
+            "number_of_shards" : 5,
+            "number_of_replicas" : 2
+        }
+    }
+}'
+
+curl -XPOST 'edx.devstack.elasticsearch:9200/courseware_index/_close'
+curl -XPUT 'edx.devstack.elasticsearch:9200/courseware_index/_settings?pretty=true' -d '{
+    "index" : {
+      "analysis" : {
+        "analyzer" : {
+          "default": {
+            "type": "custom",
+            "tokenizer": "mecab_ko_standard_tokenizer",
+            "filter": "kmoocTokenFilter"
+          }
+        },
+        "filter": {
+            "kmoocTokenFilter": {
+                 "type": "length",
+                 "min": 2,
+                 "max": 2000
+             }
+         }
+      }
+    }
+}'
+
+curl -XPOST 'edx.devstack.elasticsearch:9200/courseware_index/_open'
+
+curl -XPUT 'edx.devstack.elasticsearch:9200/courseware_index/courseware_content/_mapping' -d '{
+    "courseware_content" : {
+      "properties" : {
+        "content" : {
+          "properties" : {
+            "capa_content" : {
+              "type" : "string"
+            },
+            "display_name" : {
+              "type" : "string"
+            },
+            "html_content" : {
+              "type" : "string"
+            },
+            "transcript_aa" : {
+              "type" : "string"
+            },
+            "transcript_ar" : {
+              "type" : "string"
+            },
+            "transcript_en" : {
+              "type" : "string"
+            },
+            "transcript_fr" : {
+              "type" : "string"
+            },
+            "transcript_ja" : {
+              "type" : "string"
+            },
+            "transcript_kg" : {
+              "type" : "string"
+            },
+            "transcript_ko" : {
+              "type" : "string"
+            },
+            "transcript_zh" : {
+              "type" : "string"
+            }
+          }
+        },
+        "content_groups" : {
+          "type" : "string",
+          "index" : "not_analyzed",
+          "norms" : {
+            "enabled" : false
+          },
+          "index_options" : "docs"
+        },
+        "content_type" : {
+          "type" : "string",
+          "index" : "not_analyzed",
+          "norms" : {
+            "enabled" : false
+          },
+          "index_options" : "docs"
+        },
+        "course" : {
+          "type" : "string",
+          "index" : "not_analyzed",
+          "norms" : {
+            "enabled" : false
+          },
+          "index_options" : "docs"
+        },
+        "course_name" : {
+          "type" : "string",
+          "index" : "not_analyzed",
+          "norms" : {
+            "enabled" : false
+          },
+          "index_options" : "docs"
+        },
+        "id" : {
+          "type" : "string",
+          "index" : "not_analyzed",
+          "norms" : {
+            "enabled" : false
+          },
+          "index_options" : "docs"
+        },
+        "location" : {
+          "type" : "string",
+          "index" : "not_analyzed",
+          "norms" : {
+            "enabled" : false
+          },
+          "index_options" : "docs"
+        },
+        "org" : {
+          "type" : "string",
+          "index" : "not_analyzed",
+          "norms" : {
+            "enabled" : false
+          },
+          "index_options" : "docs"
+        },
+        "problem_types" : {
+          "type" : "string",
+          "index" : "not_analyzed",
+          "norms" : {
+            "enabled" : false
+          },
+          "index_options" : "docs"
+        },
+        "start_date" : {
+          "type" : "date",
+          "format" : "dateOptionalTime"
+        }
+      }
+    }
+}'
+
+curl -XPUT 'edx.devstack.elasticsearch:9200/courseware_index/course_info/_mapping' -d '{
+    "course_info" : {
+      "properties" : {
+        "advertised_start" : {
+          "type" : "string",
+          "index" : "not_analyzed",
+          "norms" : {
+            "enabled" : false
+          },
+          "index_options" : "docs"
+        },
+        "classfy" : {
+          "type" : "string",
+          "index" : "not_analyzed",
+          "norms" : {
+            "enabled" : false
+          },
+          "index_options" : "docs"
+        },
+        "classfysub" : {
+          "type" : "string"
+        },
+        "middle_classfy" : {
+          "type" : "string",
+          "index" : "not_analyzed",
+          "norms" : {
+            "enabled" : false
+          },
+          "index_options" : "docs"
+        },
+        "middle_classfysub" : {
+          "type" : "string"
+        },
+        "content" : {
+          "properties" : {
+            "catalog_visibility" : {
+              "type" : "string"
+            },
+            "display_name" : {
+              "type" : "string"
+            },
+            "number" : {
+              "type" : "string"
+            },
+            "short_description" : {
+              "type" : "string"
+            },
+            "overview" : {
+              "type" : "string"
+            }
+          }
+        },
+        "course" : {
+          "type" : "string",
+          "index" : "not_analyzed",
+          "norms" : {
+            "enabled" : false
+          },
+          "index_options" : "docs"
+        },
+        "course_period" : {
+          "type" : "string",
+          "index" : "not_analyzed",
+          "norms" : {
+            "enabled" : false
+          },
+          "index_options" : "docs"
+        },
+        "cperiod" : {
+          "type" : "string",
+          "index" : "not_analyzed",
+          "norms" : {
+            "enabled" : false
+          },
+          "index_options" : "docs"
+        },
+        "difficult_degree" : {
+          "type" : "string",
+          "index" : "not_analyzed",
+          "norms" : {
+            "enabled" : false
+          },
+          "index_options" : "docs"
+        },
+        "effort" : {
+          "type" : "string",
+          "index" : "not_analyzed",
+          "norms" : {
+            "enabled" : false
+          },
+          "index_options" : "docs"
+        },
+        "end" : {
+          "type" : "string",
+          "index" : "not_analyzed",
+          "norms" : {
+            "enabled" : false
+          },
+          "index_options" : "docs"
+        },
+        "enrollment_end" : {
+          "type" : "string",
+          "index" : "not_analyzed",
+          "norms" : {
+            "enabled" : false
+          },
+          "index_options" : "docs"
+        },
+        "enrollment_start" : {
+          "type" : "string",
+          "index" : "not_analyzed",
+          "norms" : {
+            "enabled" : false
+          },
+          "index_options" : "docs"
+        },
+        "id" : {
+          "type" : "string",
+          "index" : "not_analyzed",
+          "norms" : {
+            "enabled" : false
+          },
+          "index_options" : "docs"
+        },
+        "image_url" : {
+          "type" : "string",
+          "index" : "not_analyzed",
+          "norms" : {
+            "enabled" : false
+          },
+          "index_options" : "docs"
+        },
+        "language" : {
+          "type" : "string",
+          "index" : "not_analyzed",
+          "norms" : {
+            "enabled" : false
+          },
+          "index_options" : "docs"
+        },
+        "linguistics" : {
+          "type" : "string",
+          "index" : "not_analyzed",
+          "norms" : {
+            "enabled" : false
+          },
+          "index_options" : "docs"
+        },
+        "modes" : {
+          "type" : "string",
+          "index" : "not_analyzed",
+          "norms" : {
+            "enabled" : false
+          },
+          "index_options" : "docs"
+        },
+        "number" : {
+          "type" : "string",
+          "index" : "not_analyzed",
+          "norms" : {
+            "enabled" : false
+          },
+          "index_options" : "docs"
+        },
+        "org" : {
+          "type" : "string",
+          "index" : "not_analyzed",
+          "norms" : {
+            "enabled" : false
+          },
+          "index_options" : "docs"
+        },
+        "start" : {
+          "type" : "string",
+          "index" : "not_analyzed",
+          "norms" : {
+            "enabled" : false
+          },
+          "index_options" : "docs"
+        },
+        "audit_yn" : {
+          "type" : "string",
+          "index" : "not_analyzed",
+          "norms" : {
+            "enabled" : false
+          },
+          "index_options" : "docs"
+        },
+        "org_kname" : {
+          "type" : "string"
+        },
+        "org_ename" : {
+          "type" : "string"
+        },
+        "teacher_name" : {
+          "type" : "string"
+        }
+      }
+    }
+}'
+

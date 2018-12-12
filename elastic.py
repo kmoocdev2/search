@@ -1,12 +1,13 @@
-""" Elatic Search implementation for courseware search index """
+""" Elastic Search implementation for courseware search index """
 import copy
 import logging
 
 from django.conf import settings
 from django.core.cache import cache
 from elasticsearch import Elasticsearch, exceptions
-from elasticsearch.helpers import bulk
+from elasticsearch.helpers import bulk, BulkIndexError
 
+from search.api import QueryParseError
 from search.search_engine_base import SearchEngine
 from search.utils import ValueRange, _is_iterable
 
@@ -17,7 +18,7 @@ log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 # We _may_ want to use these for their special uses for certain queries,
 # but for analysed fields these kinds of characters are removed anyway, so
 # we can safely remove them from analysed matches
-RESERVED_CHARACTERS = "+-=><!(){}[]^\"~*:\\/&|?"
+RESERVED_CHARACTERS = "+=><!(){}[]^~*:\\/&|?"
 
 
 def _translate_hits(es_response):
@@ -129,12 +130,12 @@ def _process_filters(filter_dictionary):
                     }
                 ]
             }
-        else:
-            return {
-                "missing": {
-                    "field": field
-                }
+
+        return {
+            "missing": {
+                "field": field
             }
+        }
 
     return [filter_item(field) for field in filter_dictionary]
 
@@ -244,25 +245,25 @@ class ElasticSearchEngine(SearchEngine):
 
         We cache the properties of each doc_type, if they are not available, we'll load them again from Elasticsearch
         """
-        doc_mappings = ElasticSearchEngine.get_mappings(self.index_name, doc_type)
-        if not doc_mappings:
-            try:
-                doc_mappings = self._es.indices.get_mapping(
-                    index=self.index_name,
-                    doc_type=doc_type,
-                )[doc_type]
+        # Try loading the mapping from the cache.
+        mapping = ElasticSearchEngine.get_mappings(self.index_name, doc_type)
+
+        # Fall back to Elasticsearch
+        if not mapping:
+            mapping = self._es.indices.get_mapping(
+                index=self.index_name,
+                doc_type=doc_type,
+            ).get(self.index_name, {}).get('mappings', {}).get(doc_type, {})
+
+            # Cache the mapping, if one was retrieved
+            if mapping:
                 ElasticSearchEngine.set_mappings(
                     self.index_name,
                     doc_type,
-                    doc_mappings
+                    mapping
                 )
-            except exceptions.NotFoundError:
-                # In this case there are no mappings for this doc_type on the elasticsearch server
-                # This is a normal case when a new doc_type is being created, and it is expected that
-                # we'll hit it for new doc_type s
-                return {}
 
-        return doc_mappings
+        return mapping
 
     def _clear_mapping(self, doc_type):
         """ Remove the cached mappings, so that they get loaded from ES next time they are requested """
@@ -393,7 +394,7 @@ class ElasticSearchEngine(SearchEngine):
             # pylint: disable=unexpected-keyword-arg
             actions = []
             for doc_id in doc_ids:
-                log.debug("remove index for %s object with id %s", doc_type, doc_id)
+                log.debug("Removing document of type %s and index %s", doc_type, doc_id)
                 action = {
                     '_op_type': 'delete',
                     "_index": self.index_name,
@@ -401,22 +402,13 @@ class ElasticSearchEngine(SearchEngine):
                     "_id": doc_id
                 }
                 actions.append(action)
-            # bulk() returns a tuple with summary information
-            # number of successfully executed actions and number of errors if stats_only is set to True.
-            _, indexing_errors = bulk(
-                self._es,
-                actions,
-                # let notfound not cause error
-                ignore=[404],
-                **kwargs
-            )
-            if indexing_errors:
-                ElasticSearchEngine.log_indexing_error(indexing_errors)
-        # Broad exception handler to protect around bulk call
-        except Exception as ex:
-            # log information and re-raise
-            log.exception("error while deleting document from index - %s", ex.message)
-            raise ex
+            bulk(self._es, actions, **kwargs)
+        except BulkIndexError as ex:
+            valid_errors = [error for error in ex.errors if error['delete']['status'] != 404]
+
+            if valid_errors:
+                log.exception("An error occurred while removing documents from the index.")
+                raise
 
     # A few disabled pylint violations here:
     # This procedure takes each of the possible input parameters and builds the query with each argument
@@ -445,43 +437,34 @@ class ElasticSearchEngine(SearchEngine):
                **kwargs):  # pylint: disable=too-many-arguments, too-many-locals, too-many-branches
         """
         Implements call to search the index for the desired content.
-
         Args:
             query_string (str): the string of values upon which to search within the
             content of the objects within the index
-
             field_dictionary (dict): dictionary of values which _must_ exist and
             _must_ match in order for the documents to be included in the results
-
             filter_dictionary (dict): dictionary of values which _must_ match if the
             field exists in order for the documents to be included in the results;
             documents for which the field does not exist may be included in the
             results if they are not otherwise filtered out
-
             exclude_dictionary(dict): dictionary of values all of which which must
             not match in order for the documents to be included in the results;
             documents which have any of these fields and for which the value matches
             one of the specified values shall be filtered out of the result set
-
             facet_terms (dict): dictionary of terms to include within search
             facets list - key is the term desired to facet upon, and the value is a
             dictionary of extended information to include. Supported right now is a
             size specification for a cap upon how many facet results to return (can
             be an empty dictionary to use default size for underlying engine):
-
             e.g.
             {
                 "org": {"size": 10},  # only show top 10 organizations
                 "modes": {}
             }
-
             use_field_match (bool): flag to indicate whether to use elastic
             filtering or elastic matching for field matches - this is nothing but a
             potential performance tune for certain queries
-
             (deprecated) exclude_ids (list): list of id values to exclude from the results -
             useful for finding maches that aren't "one of these"
-
         Returns:
             dict object with results in the desired format
             {
@@ -521,10 +504,8 @@ class ElasticSearchEngine(SearchEngine):
                     }
                 }
             }
-
         Raises:
             ElasticsearchException when there is a problem with the response from elasticsearch
-
         Example usage:
             .search(
                 "find the words within this string",
@@ -532,7 +513,6 @@ class ElasticSearchEngine(SearchEngine):
                     "must_have_field": "mast_have_value for must_have_field"
                 },
                 {
-
                 }
             )
         """
@@ -546,7 +526,8 @@ class ElasticSearchEngine(SearchEngine):
         if query_string:
             elastic_queries.append({
                 "query_string": {
-                    "fields": ["content.*"],
+                    "fields": ["display_name^4", "short_description^2", "number"],
+                    #"fields": ["content.*"],
                     "query": query_string.encode('utf-8').translate(None, RESERVED_CHARACTERS)
                 }
             })
@@ -595,7 +576,8 @@ class ElasticSearchEngine(SearchEngine):
                 }
             }
 
-        body = {"query": query}
+        #body = {"query": query}
+        body = {"sort":["_score"], "query": query}
         if facet_terms:
             facet_query = _process_facet_terms(facet_terms)
             if facet_query:
@@ -613,3 +595,287 @@ class ElasticSearchEngine(SearchEngine):
             raise
 
         return _translate_hits(es_response)
+
+    # search method override : add parameter pagepos
+    def search(self,
+               query_string=None,
+               field_dictionary=None,
+               filter_dictionary=None,
+               exclude_dictionary=None,
+               facet_terms=None,
+               exclude_ids=None,
+               pagepos=None,
+               classfysub=None,
+               middle_classfysub=None,
+               use_field_match=False,
+               **kwargs):  # pylint: disable=too-many-arguments, too-many-locals, too-many-branches
+
+        log.debug("searching index with %s", query_string)
+
+        elastic_queries = []
+        elastic_filters = []
+
+        if query_string:
+            query_text = query_string.encode('utf-8').translate(None, RESERVED_CHARACTERS)
+        else:
+            query_text = ''
+
+        # We have a query string, search all fields for matching text within the "content" node
+        if query_string:
+            elastic_queries.append({
+                "query_string": {
+                    "fields": ["display_name^4", "short_description^2", "number", "start", "teacher_name", "org_kname", "org_ename"],
+                    #"fields": ["content.*"],
+                    "query": query_string.encode('utf-8').translate(None, RESERVED_CHARACTERS)
+                }
+            })
+
+        #print ("elastic_queries: 0 -->",elastic_queries)
+
+        if field_dictionary:
+            if use_field_match:
+                #print "111111"
+                elastic_queries.extend(_process_field_queries(field_dictionary))
+            else:
+                #print "222222"
+                elastic_filters.extend(_process_field_filters(field_dictionary))
+
+        #print ("elastic_queries: 1 -->",elastic_queries)
+        #print ("0", elastic_filters)
+
+        filter_field = None
+        range_datevalues = {}
+        range_datevalues.update({"lt": "2030-01-01T00:00:00+00:00"})
+        #print ("range_datevalues", range_datevalues)
+        #filter_field = {"range": { "start": {"lt": "2030-01-01T00:00:00.000000"}}}
+        filter_field = {"range": {"start": range_datevalues}}
+        #print ("filter_field", filter_field)
+        elastic_filters.extend([filter_field])
+        #print ("1", elastic_filters)
+
+
+        if filter_dictionary:
+            elastic_filters.extend(_process_filters(filter_dictionary))
+
+        #print elastic_filters
+
+        # Support deprecated argument of exclude_ids
+        if exclude_ids:
+            if not exclude_dictionary:
+                exclude_dictionary = {}
+            if "_id" not in exclude_dictionary:
+                exclude_dictionary["_id"] = []
+            exclude_dictionary["_id"].extend(exclude_ids)
+
+        if exclude_dictionary:
+            elastic_filters.append(_process_exclude_dictionary(exclude_dictionary))
+
+        query_segment = {
+            "match_all": {}
+        }
+
+        # "term": {"catalog_visibility": "none about"}
+        # [{"term": {"catalog_visibility": "none"}}, {"term": {"catalog_visibility": "about"}}]
+        query_sub_segment = {}
+        if pagepos == 'l':
+            query_sub_segment = {
+                    "term": {"catalog_visibility": "none about"}
+            }
+        elif pagepos == 'd':
+            query_sub_segment = {
+                    "term": {"catalog_visibility": "none"}
+            }
+
+        if elastic_queries:
+            query_segment = {
+                "bool": {
+                    "must": elastic_queries
+                }
+            }
+
+        query = query_segment
+
+        if elastic_filters:
+            if classfysub != None and classfysub != '' and middle_classfysub != None and middle_classfysub != '':
+                if len(query_sub_segment)>0:
+                    if len(classfysub)>0 and len(middle_classfysub) > 0:
+                        classfysub.replace(',',' ')
+                        middle_classfysub.replace(',',' ')
+                        #filter_segment = {
+                        #    "bool": {
+                        #        "should": [{"term": {"classfy": classfysub}}, {"term": {"classfysub": classfysub} }, {"term": {"middle_classfy": middle_classfysub}}, {"term": {"middle_classfysub": middle_classfysub}}],
+                        #        "must_not": [{"term": {"catalog_visibility": "none"}}, {"term": {"catalog_visibility": "about"}}],
+                        #        "must": elastic_filters
+                        #    }
+                        #}
+                        # "should": [{"term": {"display_name": query_text}}, {"term": {"short_description": query_text}}, {"term": {"teacher_name": query_text}}, {"term": {"org_kname": query_text}}, {"term": {"org_ename": query_text}}],
+                        filter_segment = {
+                            "bool": {
+                                "should": [{"term": {"middle_classfy": middle_classfysub}}, {"term": {"middle_classfysub": middle_classfysub}}],
+                                "must_not": [{"term": {"catalog_visibility": "none"}}, {"term": {"catalog_visibility": "about"}}],
+                                "must": elastic_filters
+                            }
+                        }
+                    else:
+                        filter_segment = {
+                            "bool": {
+                                "must_not": [{"term": {"catalog_visibility": "none"}}, {"term": {"catalog_visibility": "about"}}],
+                                "must": elastic_filters
+                            }
+                        }
+                else:
+                    if len(classfysub)>0 and len(middle_classfysub) > 0:
+                        classfysub.replace(',',' ')
+                        middle_classfysub.replace(',',' ')
+                        #filter_segment = {
+                        #    "bool": {
+                        #        "should": [{"term": {"classfy": classfysub}}, {"term": {"classfysub": classfysub}}, {"term": {"middle_classfy": middle_classfysub}},{"term": {"middle_classfysub": middle_classfysub}}],
+                        #        "must": elastic_filters
+                        #    }
+                        #}
+                        filter_segment = {
+                            "bool": {
+                                "should": [{"term": {"middle_classfy": middle_classfysub}},{"term":{"middle_classfysub": middle_classfysub}}],
+                                "must": elastic_filters
+                            }
+                        }
+                    else:
+                        filter_segment = {
+                            "bool": {
+                                "must": elastic_filters
+                            }
+                        }
+            elif (classfysub == '' or classfysub == None) and (middle_classfysub != None and middle_classfysub != ''):
+                if len(query_sub_segment)>0:
+                    if len(middle_classfysub)>0:
+                        middle_classfysub.replace(',',' ')
+                        filter_segment = {
+                            "bool": {
+                                "should": [{"term": {"middle_classfy": middle_classfysub} },{ "term": {"middle_classfysub": middle_classfysub}}],
+                                "must_not": [{"term": {"catalog_visibility": "none"}}, {"term": {"catalog_visibility": "about"}}],
+                                "must": elastic_filters
+                            }
+                        }
+                    else:
+                        filter_segment = {
+                            "bool": {
+                                "must_not": [{"term": {"catalog_visibility": "none"}}, {"term": {"catalog_visibility": "about"}}],
+                                "must": elastic_filters
+                            }
+                        }
+                else:
+                    if len(middle_classfysub)>0:
+                        middle_classfysub.replace(',',' ')
+                        filter_segment = {
+                            "bool": {
+                                "should": [{"term": {"middle_classfy": middle_classfysub} },{ "term": {"middle_classfysub": middle_classfysub}}],
+                                "must": elastic_filters
+                            }
+                        }
+                    else:
+                        filter_segment = {
+                            "bool": {
+                                "must": elastic_filters
+                            }
+                        }
+            elif (middle_classfysub == '' or middle_classfysub == None) and (classfysub != None and classfysub != ''):
+                if len(query_sub_segment)>0:
+                    if len(classfysub)>0:
+                        classfysub.replace(',',' ')
+                        filter_segment = {
+                            "bool": {
+                                "should": [{"term": {"classfy": classfysub} },{ "term": {"classfysub": classfysub}}],
+                                "must_not": [{"term": {"catalog_visibility": "none"}}, {"term": {"catalog_visibility": "about"}}],
+                                "must": elastic_filters
+                            }
+                        }
+                    else:
+                        filter_segment = {
+                            "bool": {
+                                "must_not": [{"term": {"catalog_visibility": "none"}}, {"term": {"catalog_visibility": "about"}}],
+                                "must": elastic_filters
+                            }
+                        }
+                else:
+                    if len(classfysub)>0:
+                        classfysub.replace(',',' ')
+                        filter_segment = {
+                            "bool": {
+                                "should": [{"term": {"classfy": classfysub} },{ "term": {"classfysub": classfysub}}],
+                                "must": elastic_filters
+                            }
+                        }
+                    else:
+                        filter_segment = {
+                            "bool": {
+                                "must": elastic_filters
+                            }
+                        }
+            else:
+                if len(query_sub_segment)>0:
+                    filter_segment = {
+                        "bool": {
+                            "must_not": [{"term": {"catalog_visibility": "none"}}, {"term": {"catalog_visibility": "about"}}],
+                            "must": elastic_filters
+                        }
+                    }
+                else:
+                    filter_segment = {
+                        "bool": {
+                            "must": elastic_filters
+                        }
+                    }
+
+
+        if pagepos != '' and pagepos != None:
+            if elastic_filters:
+                query = {
+                    "filtered": {
+                        "query": query_segment,
+                        "filter": filter_segment,
+                    }
+                }
+        else:
+            if elastic_filters:
+                query = {
+                    "filtered": {
+                        "query": query_segment,
+                        "filter": filter_segment,
+                    }
+                }
+
+        #body = {"query": query}
+        #body = {"sort":["_score"], "query": query}
+        #body = {"sort":[{"_score":{"order":"desc"}},{"start":{"order":"desc"}}], "query": query}
+
+        if kwargs is not None:
+            for key, value in kwargs.iteritems():
+                if key == "doc_type" and value == "courseware_content":
+                    print "%s == %s" % (key, value)
+                    body = {"sort": [{"_score": {"order": "desc"}}], "query": query}
+                    break
+                if key == "doc_type" and value == "course_info":
+                    print "%s == %s" % (key, value)
+                    body = {"sort": [{"_score": {"order": "desc"}}, {"start": {"order": "desc"}}], "query": query}
+                    break
+
+        if facet_terms:
+            facet_query = _process_facet_terms(facet_terms)
+            if facet_query:
+                body["facets"] = facet_query
+
+        try:
+            es_response = self._es.search(
+                index=self.index_name,
+                body=body,
+                **kwargs
+            )
+        except exceptions.ElasticsearchException as ex:
+            # log information and re-raise
+            log.exception("error while searching index - %s", ex.message)
+            raise
+
+        print ("body:-->", body)
+
+        return _translate_hits(es_response)
+
