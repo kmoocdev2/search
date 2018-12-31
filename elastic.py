@@ -11,6 +11,8 @@ from search.api import QueryParseError
 from search.search_engine_base import SearchEngine
 from search.utils import ValueRange, _is_iterable
 
+import ast
+
 # log appears to be standard name used for logger
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -651,13 +653,9 @@ class ElasticSearchEngine(SearchEngine):
         filter_field = {"range": {"start": range_datevalues}}
         #print ("filter_field", filter_field)
         elastic_filters.extend([filter_field])
-        #print ("1", elastic_filters)
-
 
         if filter_dictionary:
             elastic_filters.extend(_process_filters(filter_dictionary))
-
-        #print elastic_filters
 
         # Support deprecated argument of exclude_ids
         if exclude_ids:
@@ -851,12 +849,16 @@ class ElasticSearchEngine(SearchEngine):
         if kwargs is not None:
             for key, value in kwargs.iteritems():
                 if key == "doc_type" and value == "courseware_content":
-                    print "%s == %s" % (key, value)
+                    # print "%s == %s" % (key, value)
                     body = {"sort": [{"_score": {"order": "desc"}}], "query": query}
                     break
                 if key == "doc_type" and value == "course_info":
-                    print "%s == %s" % (key, value)
+                    # print "start : %s == %s" % (key, value)
                     body = {"sort": [{"_score": {"order": "desc"}}, {"start": {"order": "desc"}}], "query": query}
+                    body_buf = body
+                    if str(body_buf).find("{'term': {u'org': u'SMUk'}}") > 0:
+                        str_tmp = str(body_buf).replace("{'term': {u'org': u'SMUk'}}", "{'terms': {u'org': [u'SMUk', u'SMUCk']}}")
+                        body = ast.literal_eval(str_tmp)
                     break
 
         if facet_terms:
