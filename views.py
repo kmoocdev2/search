@@ -15,6 +15,8 @@ from .api import QueryParseError, perform_search, course_discovery_search, cours
 from .initializer import SearchInitializer
 from django.db import connections
 
+from django.views.decorators.csrf import csrf_exempt
+
 # log appears to be standard name used for logger
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -150,6 +152,7 @@ def do_search(request, course_id=None):
 
 
 @require_POST
+@csrf_exempt
 def course_discovery(request):
     """
     Search for courses
