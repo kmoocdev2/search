@@ -10,7 +10,7 @@ from .result_processor import SearchResultProcessor
 from .utils import DateRange
 
 # Default filters that we support, override using COURSE_DISCOVERY_FILTERS setting if desired
-DEFAULT_FILTER_FIELDS = ["org", "language", "modes", "classfy", "middle_classfy", "classfysub", "middle_classfysub", "linguistics", "range", "course_period", "org_kname", "org_ename", "teacher_name"]
+DEFAULT_FILTER_FIELDS = ["org", "language", "modes", "classfy", "middle_classfy", "classfysub", "middle_classfysub", "linguistics", "range", "course_period"]
 
 
 def course_discovery_filter_fields():
@@ -108,17 +108,20 @@ def course_discovery_search(search_term=None, size=20, from_=0, field_dictionary
         elif range_val == 't':
             use_field_dictionary['start'] = DateRange(datetime.utcnow(), None)
 
-    if 'classfy' in field_dictionary:
-        classfysub = field_dictionary['classfy']
-        del field_dictionary['classfy']
-    else:
-        classfysub = ''
+    classfysub = None
+    middle_classfysub = None
 
-    if 'middle_classfy' in field_dictionary:
-        middle_classfysub = field_dictionary['middle_classfy']
-        del field_dictionary['middle_classfy']
-    else:
-        middle_classfysub = ''
+    # if 'classfy' in field_dictionary:
+    #     classfysub = field_dictionary['classfy']
+    #     del field_dictionary['classfy']
+    # else:
+    #     classfysub = ''
+    #
+    # if 'middle_classfy' in field_dictionary:
+    #     middle_classfysub = field_dictionary['middle_classfy']
+    #     del field_dictionary['middle_classfy']
+    # else:
+    #     middle_classfysub = ''
 
     # for kmooc ------------------------------------------------------------------ e
 

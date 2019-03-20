@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ba944484-3e28-48b1-a9ec-ee0ee5f707ee" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/api.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/elastic.py" beforeDir="false" afterPath="$PROJECT_DIR$/elastic.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -32,12 +34,12 @@
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="py" value="378" />
+          <entry key="py" value="532" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Python" value="378" />
+          <entry key="Python" value="532" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.vcs.git.usages">
@@ -49,22 +51,25 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/api.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="309">
-              <caret line="68" lean-forward="true" selection-start-line="68" selection-end-line="68" />
+            <state relative-caret-position="153">
+              <caret line="112" lean-forward="true" selection-start-line="112" selection-end-line="112" />
+              <folding>
+                <element signature="e#69#98#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/elastic.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="250">
-              <caret line="587" column="13" lean-forward="true" selection-start-line="587" selection-start-column="13" selection-end-line="587" selection-end-column="13" />
+            <state relative-caret-position="516">
+              <caret line="599" column="29" lean-forward="true" selection-start-line="599" selection-start-column="29" selection-end-line="599" selection-end-column="29" />
               <folding>
-                <element signature="e#66#77#0" expanded="true" />
+                <element signature="e#90#101#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -86,10 +91,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>classfy_val</find>
-      <find>def</find>
-      <find>DEFAULT_FILTER_FIELDS</find>
-      <find>content</find>
       <find>pagepos</find>
       <find>COURSE_DISCOVERY_FACETS</find>
       <find>course_discovery_search</find>
@@ -116,6 +117,10 @@
       <find>&quot;bool&quot;</find>
       <find>use_field_match</find>
       <find>elastic_filters</find>
+      <find>missing</find>
+      <find>&quot;about&quot;</find>
+      <find>must_not</find>
+      <find>classfysub</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -129,9 +134,9 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/api.py" />
         <option value="$PROJECT_DIR$/views.py" />
         <option value="$PROJECT_DIR$/elastic.py" />
+        <option value="$PROJECT_DIR$/api.py" />
       </list>
     </option>
   </component>
@@ -243,19 +248,22 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/api.py">
+    <entry file="file://$PROJECT_DIR$/elastic.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="309">
-          <caret line="68" lean-forward="true" selection-start-line="68" selection-end-line="68" />
+        <state relative-caret-position="516">
+          <caret line="599" column="29" lean-forward="true" selection-start-line="599" selection-start-column="29" selection-end-line="599" selection-end-column="29" />
+          <folding>
+            <element signature="e#90#101#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/elastic.py">
+    <entry file="file://$PROJECT_DIR$/api.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="250">
-          <caret line="587" column="13" lean-forward="true" selection-start-line="587" selection-start-column="13" selection-end-line="587" selection-end-column="13" />
+        <state relative-caret-position="153">
+          <caret line="112" lean-forward="true" selection-start-line="112" selection-end-line="112" />
           <folding>
-            <element signature="e#66#77#0" expanded="true" />
+            <element signature="e#69#98#0" expanded="true" />
           </folding>
         </state>
       </provider>

@@ -578,6 +578,7 @@ class ElasticSearchEngine(SearchEngine):
             }
 
         query = query_segment
+
         if elastic_filters:
 
             filter_segment = {
