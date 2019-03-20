@@ -93,6 +93,7 @@ def _process_field_queries(field_dictionary):
     We have a field_dictionary - we want to match the values for an elasticsearch "match" query
     This is only potentially useful when trying to tune certain search operations
     """
+
     def field_item(field):
         """ format field match as "match" item for elasticsearch query """
         return {
@@ -117,6 +118,7 @@ def _process_filters(filter_dictionary):
     and matches, then we can include, OR if the field is undefined, then we
     assume it is safe to include
     """
+
     def filter_item(field):
         """ format elasticsearch filter to pass if value matches OR field is not included """
         if filter_dictionary[field] is not None:
@@ -184,7 +186,6 @@ def _process_facet_terms(facet_terms):
 
 
 class ElasticSearchEngine(SearchEngine):
-
     """ ElasticSearch implementation of SearchEngine abstraction """
 
     @staticmethod
@@ -434,6 +435,8 @@ class ElasticSearchEngine(SearchEngine):
                facet_terms=None,
                exclude_ids=None,
                use_field_match=False,
+               classfysub=None,
+               middle_classfysub=None,
                **kwargs):  # pylint: disable=too-many-arguments, too-many-locals, too-many-branches, arguments-differ
         """
         Implements call to search the index for the desired content.
@@ -575,6 +578,13 @@ class ElasticSearchEngine(SearchEngine):
 
         query = query_segment
         if elastic_filters:
+
+            # kmooc add --- s
+            if classfysub and middle_classfysub:
+                pass
+
+            # kmooc add --- e
+
             filter_segment = {
                 "bool": {
                     "must": elastic_filters
@@ -588,10 +598,22 @@ class ElasticSearchEngine(SearchEngine):
             }
 
         body = {"query": query}
+
+        # for kmooc : sort 추가
+
+        body.update({"sort": [
+            {"_score": {"order": "desc"}},
+            {"start": {"order": "desc"}}
+        ]})
+
         if facet_terms:
             facet_query = _process_facet_terms(facet_terms)
             if facet_query:
                 body["facets"] = facet_query
+
+        log.info('es query ----------------------------------------------------------------------------- s')
+        log.info(body)
+        log.info('es query ----------------------------------------------------------------------------- e')
 
         try:
             es_response = self._es.search(

@@ -1,3 +1,4 @@
+#-*- coding: utf-8 -*-
 """ search business logic implementations """
 from datetime import datetime
 
@@ -9,7 +10,7 @@ from .result_processor import SearchResultProcessor
 from .utils import DateRange
 
 # Default filters that we support, override using COURSE_DISCOVERY_FILTERS setting if desired
-DEFAULT_FILTER_FIELDS = ["org", "modes", "language"]
+DEFAULT_FILTER_FIELDS = ["org", "language", "modes", "classfy", "middle_classfy", "classfysub", "middle_classfysub", "linguistics", "range", "course_period", "org_kname", "org_ename", "teacher_name"]
 
 
 def course_discovery_filter_fields():
@@ -19,7 +20,7 @@ def course_discovery_filter_fields():
 
 def course_discovery_facets():
     """ Discovery facets to include, by default we specify each filter field with unspecified size attribute """
-    return getattr(settings, "COURSE_DISCOVERY_FACETS", {field: {} for field in course_discovery_filter_fields()})
+    return getattr(settings, "COURSE_DISCOVERY_FACETS", {field: {'size': '300'} for field in course_discovery_filter_fields()})
 
 
 class NoSearchEngineError(Exception):
@@ -82,12 +83,48 @@ def course_discovery_search(search_term=None, size=20, from_=0, field_dictionary
     """
     # We'll ignore the course-enrollemnt informaiton in field and filter
     # dictionary, and use our own logic upon enrollment dates for these
-    use_search_fields = ["org"]
+    # use_search_fields = ["org"]
+    use_search_fields = ["org", 'org_kname', 'org_ename', 'teacher_name']
+
     (search_fields, _, exclude_dictionary) = SearchFilterGenerator.generate_field_filters()
     use_field_dictionary = {}
     use_field_dictionary.update({field: search_fields[field] for field in search_fields if field in use_search_fields})
+
+    # for kmooc ------------------------------------------------------------------ s
+    if 'range' in field_dictionary:
+        range_val = field_dictionary['range']
+
+        del field_dictionary['range']
+
+        if range_val == 'i':
+            use_field_dictionary['start'] = DateRange(None, datetime.utcnow())
+            use_field_dictionary['end'] = DateRange(datetime.utcnow(), None)
+        elif range_val == 'a':
+            use_field_dictionary['audit_yn'] = 'Y'
+            use_field_dictionary['end'] = DateRange(None, datetime.utcnow())
+        elif range_val == 'e':
+            use_field_dictionary['audit_yn'] = 'N'
+            use_field_dictionary['end'] = DateRange(None, datetime.utcnow())
+        elif range_val == 't':
+            use_field_dictionary['start'] = DateRange(datetime.utcnow(), None)
+
+    if 'classfy' in field_dictionary:
+        classfysub = field_dictionary['classfy']
+        del field_dictionary['classfy']
+    else:
+        classfysub = ''
+
+    if 'middle_classfy' in field_dictionary:
+        middle_classfysub = field_dictionary['middle_classfy']
+        del field_dictionary['middle_classfy']
+    else:
+        middle_classfysub = ''
+
+    # for kmooc ------------------------------------------------------------------ e
+
     if field_dictionary:
         use_field_dictionary.update(field_dictionary)
+
     if not getattr(settings, "SEARCH_SKIP_ENROLLMENT_START_DATE_FILTERING", False):
         use_field_dictionary["enrollment_start"] = DateRange(None, datetime.utcnow())
 
@@ -103,9 +140,12 @@ def course_discovery_search(search_term=None, size=20, from_=0, field_dictionary
         # only show when enrollment start IS provided and is before now
         field_dictionary=use_field_dictionary,
         # show if no enrollment end is provided and has not yet been reached
-        filter_dictionary={"enrollment_end": DateRange(datetime.utcnow(), None)},
+        # filter_dictionary={"enrollment_end": DateRange(datetime.utcnow(), None)},
+        filter_dictionary={"enrollment_start": DateRange(None, datetime.utcnow())},
         exclude_dictionary=exclude_dictionary,
         facet_terms=course_discovery_facets(),
+        classfysub=classfysub,
+        middle_classfysub=middle_classfysub,
     )
 
     return results
