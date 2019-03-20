@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """ Elastic Search implementation for courseware search index """
 import copy
 import logging
@@ -580,17 +580,21 @@ class ElasticSearchEngine(SearchEngine):
         query = query_segment
         if elastic_filters:
 
-            # kmooc add --- s
-            if classfysub and middle_classfysub:
-                pass
-
-            # kmooc add --- e
-
             filter_segment = {
                 "bool": {
-                    "must": elastic_filters
+                    "must_not": [{"term": {"catalog_visibility": "none"}}, {"term": {"catalog_visibility": "about"}}],
+                    "must": elastic_filters,
                 }
             }
+
+            # kmooc add --------------------------------------------- s
+            if classfysub and middle_classfysub:
+                filter_segment['bool'].update({
+                    "should": [{"term": {"middle_classfy": middle_classfysub}}, {"term": {"middle_classfysub": middle_classfysub}}]
+                })
+
+            # kmooc add --------------------------------------------- e
+
             query = {
                 "filtered": {
                     "query": query_segment,
