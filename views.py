@@ -1,3 +1,4 @@
+#-*- coding: utf-8 -*-
 """ handle requests for courseware search http requests """
 # This contains just the url entry points to use if desired, which currently has only one
 # pylint: disable=too-few-public-methods

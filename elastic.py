@@ -1,3 +1,4 @@
+#-*- coding: utf-8 -*-
 """ Elastic Search implementation for courseware search index """
 import copy
 import logging
