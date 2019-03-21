@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """ search business logic implementations """
 from datetime import datetime
 
@@ -8,6 +8,9 @@ from .filter_generator import SearchFilterGenerator
 from .search_engine_base import SearchEngine
 from .result_processor import SearchResultProcessor
 from .utils import DateRange
+import logging
+
+log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 # Default filters that we support, override using COURSE_DISCOVERY_FILTERS setting if desired
 DEFAULT_FILTER_FIELDS = ["org", "language", "modes", "classfy", "middle_classfy", "classfysub", "middle_classfysub", "linguistics", "range", "course_period"]
@@ -57,6 +60,8 @@ def perform_search(
     if not searcher:
         raise NoSearchEngineError("No search engine specified in settings.SEARCH_ENGINE")
 
+    log.info('@@@ perform_search call!')
+
     results = searcher.search_string(
         search_term,
         field_dictionary=field_dictionary,
@@ -84,11 +89,13 @@ def course_discovery_search(search_term=None, size=20, from_=0, field_dictionary
     # We'll ignore the course-enrollemnt informaiton in field and filter
     # dictionary, and use our own logic upon enrollment dates for these
     # use_search_fields = ["org"]
-    use_search_fields = ["org", 'org_kname', 'org_ename', 'teacher_name']
+    use_search_fields = ["org", "language", "modes", 'classfy', 'middle_classfy', 'classfysub', 'middle_classfysub', 'linguistics', 'range', 'course_period', 'start', 'org_kname', 'org_ename', 'teacher_name']
 
     (search_fields, _, exclude_dictionary) = SearchFilterGenerator.generate_field_filters()
     use_field_dictionary = {}
     use_field_dictionary.update({field: search_fields[field] for field in search_fields if field in use_search_fields})
+
+
 
     # for kmooc ------------------------------------------------------------------ s
     if 'range' in field_dictionary:
@@ -107,22 +114,6 @@ def course_discovery_search(search_term=None, size=20, from_=0, field_dictionary
             use_field_dictionary['end'] = DateRange(None, datetime.utcnow())
         elif range_val == 't':
             use_field_dictionary['start'] = DateRange(datetime.utcnow(), None)
-
-    classfysub = None
-    middle_classfysub = None
-
-    # if 'classfy' in field_dictionary:
-    #     classfysub = field_dictionary['classfy']
-    #     del field_dictionary['classfy']
-    # else:
-    #     classfysub = ''
-    #
-    # if 'middle_classfy' in field_dictionary:
-    #     middle_classfysub = field_dictionary['middle_classfy']
-    #     del field_dictionary['middle_classfy']
-    # else:
-    #     middle_classfysub = ''
-
     # for kmooc ------------------------------------------------------------------ e
 
     if field_dictionary:
@@ -134,6 +125,15 @@ def course_discovery_search(search_term=None, size=20, from_=0, field_dictionary
     searcher = SearchEngine.get_search_engine(getattr(settings, "COURSEWARE_INDEX_NAME", "courseware_index"))
     if not searcher:
         raise NoSearchEngineError("No search engine specified in settings.SEARCH_ENGINE")
+
+    log.info('111 ###################################### course_discovery_search ###################################### >>>>>>>>')
+    log.info(search_term)
+    log.info('--------------------------------------------------------------------------------------------------------------')
+    log.info(field_dictionary)
+    log.info('--------------------------------------------------------------------------------------------------------------')
+    log.info(use_field_dictionary)
+    log.info('222 ###################################### course_discovery_search ###################################### <<<<<<<<')
+
 
     results = searcher.search(
         query_string=search_term,
@@ -147,8 +147,6 @@ def course_discovery_search(search_term=None, size=20, from_=0, field_dictionary
         filter_dictionary={"enrollment_start": DateRange(None, datetime.utcnow())},
         exclude_dictionary=exclude_dictionary,
         facet_terms=course_discovery_facets(),
-        classfysub=classfysub,
-        middle_classfysub=middle_classfysub,
     )
 
     return results

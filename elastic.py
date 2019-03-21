@@ -110,7 +110,7 @@ def _process_field_filters(field_dictionary):
     """
     We have a field_dictionary - we match the values using a "term" filter in elasticsearch
     """
-    return [_get_filter_field(field, field_value) for field, field_value in field_dictionary.items()]
+    return [_get_filter_field(field, field_value) for field, field_value in field_dictionary.items() if field not in ['classfy', 'middle_classfy']]
 
 
 def _process_filters(filter_dictionary):
@@ -273,6 +273,9 @@ class ElasticSearchEngine(SearchEngine):
 
     def __init__(self, index=None):
         super(ElasticSearchEngine, self).__init__(index)
+
+        log.info(getattr(settings, "ELASTIC_SEARCH_CONFIG", [{}]))
+
         es_config = getattr(settings, "ELASTIC_SEARCH_CONFIG", [{}])
         self._es = getattr(settings, "ELASTIC_SEARCH_IMPL", Elasticsearch)(es_config)
         if not self._es.indices.exists(index=self.index_name):
@@ -436,8 +439,6 @@ class ElasticSearchEngine(SearchEngine):
                facet_terms=None,
                exclude_ids=None,
                use_field_match=False,
-               classfysub=None,
-               middle_classfysub=None,
                **kwargs):  # pylint: disable=too-many-arguments, too-many-locals, too-many-branches, arguments-differ
         """
         Implements call to search the index for the desired content.
@@ -539,10 +540,12 @@ class ElasticSearchEngine(SearchEngine):
         elastic_filters = []
 
         # We have a query string, search all fields for matching text within the "content" node
+        # k-mooc 요청사항으로 검색 범위를 조절하고 가중치 구현을 위해 es 부스팅 옵션 사용
         if query_string:
             elastic_queries.append({
                 "query_string": {
-                    "fields": ["content.*"],
+                    # "fields": ["content.*"],
+                    "fields": ["display_name^4", "short_description^2", "number"],
                     "query": query_string.encode('utf-8').translate(None, RESERVED_CHARACTERS)
                 }
             })
@@ -567,19 +570,23 @@ class ElasticSearchEngine(SearchEngine):
         if exclude_dictionary:
             elastic_filters.append(_process_exclude_dictionary(exclude_dictionary))
 
-        query_segment = {
-            "match_all": {}
-        }
+        # query_segment = {
+        #     "match_all": {}
+        # }
+
         if elastic_queries:
             query_segment = {
                 "bool": {
                     "must": elastic_queries
                 }
             }
+        else:
+            query_segment = {}
 
         query = query_segment
 
         if elastic_filters:
+            log.info('elastic_filters is True..')
 
             filter_segment = {
                 "bool": {
@@ -589,11 +596,51 @@ class ElasticSearchEngine(SearchEngine):
             }
 
             # kmooc add --------------------------------------------- s
-            if classfysub and middle_classfysub:
-                filter_segment['bool'].update({
-                    "should": [{"term": {"middle_classfy": middle_classfysub}}, {"term": {"middle_classfysub": middle_classfysub}}]
-                })
+            classfy = field_dictionary['classfy'] if 'classfy' in field_dictionary else None
+            middle_classfy = field_dictionary['middle_classfy'] if 'middle_classfy' in field_dictionary else None
 
+            if classfy:
+                log.info('classfy: %s' % classfy)
+            else:
+                log.info('classfy not exists')
+
+            if middle_classfy:
+                log.info('middle_classfy: %s' % middle_classfy)
+            else:
+                log.info('middle_classfy not exists')
+
+            if classfy:
+                query_segment = [
+                    {
+                        "wildcard": {
+                            "classfy": "%s" % classfy
+                        }
+                    },
+                    {
+                        "wildcard": {
+                            "classfysub": "*%s*" % classfy
+                        }
+                    }
+                ]
+
+            if middle_classfy:
+                query_segment = [
+                    {
+                        "wildcard": {
+                            "middle_classfy": "%s" % middle_classfy
+                        }
+                    },
+                    {
+                        "wildcard": {
+                            "middle_classfysub": "*%s*" % middle_classfy
+                        }
+                    }
+                ]
+
+            if not query_segment:
+                query_segment = {
+                    "match_all": {}
+                }
             # kmooc add --------------------------------------------- e
 
             query = {
@@ -602,14 +649,14 @@ class ElasticSearchEngine(SearchEngine):
                     "filter": filter_segment,
                 }
             }
+        else:
+            log.info('elastic_filters is False..')
 
         body = {"query": query}
 
-        # for kmooc : sort 추가
-
         body.update({"sort": [
             {"_score": {"order": "desc"}},
-            {"start": {"order": "desc"}}
+            #     {"start": {"order": "desc"}}
         ]})
 
         if facet_terms:
@@ -617,9 +664,9 @@ class ElasticSearchEngine(SearchEngine):
             if facet_query:
                 body["facets"] = facet_query
 
-        log.info('es query ----------------------------------------------------------------------------- s')
+        log.info('es query ----------------------------------------------------------------------------- 1')
         log.info(body)
-        log.info('es query ----------------------------------------------------------------------------- e')
+        log.info('es query ----------------------------------------------------------------------------- 2')
 
         try:
             es_response = self._es.search(
