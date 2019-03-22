@@ -2,10 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ba944484-3e28-48b1-a9ec-ee0ee5f707ee" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/api.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/elastic.py" beforeDir="false" afterPath="$PROJECT_DIR$/elastic.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/views.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -36,12 +34,12 @@
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="py" value="2064" />
+          <entry key="py" value="2601" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Python" value="2064" />
+          <entry key="Python" value="2601" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.vcs.git.usages">
@@ -56,8 +54,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/api.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="469">
-              <caret line="129" column="24" selection-start-line="129" selection-start-column="24" selection-end-line="129" selection-end-column="24" />
+            <state relative-caret-position="708">
+              <caret line="149" column="46" lean-forward="true" selection-start-line="149" selection-start-column="46" selection-end-line="149" selection-end-column="46" />
               <folding>
                 <element signature="e#69#98#0" expanded="true" />
               </folding>
@@ -68,10 +66,10 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/elastic.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="484">
-              <caret line="599" column="73" selection-start-line="599" selection-start-column="73" selection-end-line="599" selection-end-column="73" />
+            <state relative-caret-position="425">
+              <caret line="531" column="13" lean-forward="true" selection-start-line="531" selection-start-column="13" selection-end-line="531" selection-end-column="13" />
               <folding>
-                <element signature="e#90#101#0" expanded="true" />
+                <element signature="e#66#77#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -93,9 +91,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>sort</find>
-      <find>middle_classfy_val</find>
-      <find>middle_classfysub</find>
       <find>replac</find>
       <find>','</find>
       <find>index</find>
@@ -117,12 +112,15 @@
       <find>elastic_filters</find>
       <find>wildc</find>
       <find>query_string</find>
-      <find>search_term</find>
       <find>elastic_filters is True</find>
       <find>elastic_queries</find>
       <find>query</find>
       <find>query_segment</find>
       <find>query_segment =</find>
+      <find>search_term</find>
+      <find>facet</find>
+      <find>filter_segment</find>
+      <find>extend</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -259,8 +257,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/api.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="469">
-          <caret line="129" column="24" selection-start-line="129" selection-start-column="24" selection-end-line="129" selection-end-column="24" />
+        <state relative-caret-position="708">
+          <caret line="149" column="46" lean-forward="true" selection-start-line="149" selection-start-column="46" selection-end-line="149" selection-end-column="46" />
           <folding>
             <element signature="e#69#98#0" expanded="true" />
           </folding>
@@ -269,10 +267,10 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/elastic.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="484">
-          <caret line="599" column="73" selection-start-line="599" selection-start-column="73" selection-end-line="599" selection-end-column="73" />
+        <state relative-caret-position="425">
+          <caret line="531" column="13" lean-forward="true" selection-start-line="531" selection-start-column="13" selection-end-line="531" selection-end-column="13" />
           <folding>
-            <element signature="e#90#101#0" expanded="true" />
+            <element signature="e#66#77#0" expanded="true" />
           </folding>
         </state>
       </provider>
