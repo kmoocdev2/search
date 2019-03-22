@@ -9,11 +9,12 @@ from .search_engine_base import SearchEngine
 from .result_processor import SearchResultProcessor
 from .utils import DateRange
 import logging
+import json
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 # Default filters that we support, override using COURSE_DISCOVERY_FILTERS setting if desired
-DEFAULT_FILTER_FIELDS = ["org", "language", "modes", "classfy", "middle_classfy", "classfysub", "middle_classfysub", "linguistics", "range", "course_period"]
+DEFAULT_FILTER_FIELDS = ['org', 'language', 'modes', 'classfy', 'middle_classfy', 'linguistics', 'course_period', 'fourth_industry_yn', 'job_edu_yn', 'linguistics', 'range']
 
 
 def course_discovery_filter_fields():
@@ -89,7 +90,8 @@ def course_discovery_search(search_term=None, size=20, from_=0, field_dictionary
     # We'll ignore the course-enrollemnt informaiton in field and filter
     # dictionary, and use our own logic upon enrollment dates for these
     # use_search_fields = ["org"]
-    use_search_fields = ["org", "language", "modes", 'classfy', 'middle_classfy', 'classfysub', 'middle_classfysub', 'linguistics', 'range', 'course_period', 'start', 'org_kname', 'org_ename', 'teacher_name']
+    use_search_fields = ["org", "language", "modes", 'classfy', 'middle_classfy', 'classfysub', 'middle_classfysub', 'linguistics', 'range', 'course_period', 'start', 'org_kname', 'org_ename', 'teacher_name',
+                         'fourth_industry_yn', 'job_edu_yn']
 
     (search_fields, _, exclude_dictionary) = SearchFilterGenerator.generate_field_filters()
     use_field_dictionary = {}
@@ -98,7 +100,6 @@ def course_discovery_search(search_term=None, size=20, from_=0, field_dictionary
     # for kmooc ------------------------------------------------------------------ s
     if 'range' in field_dictionary:
         range_val = field_dictionary['range']
-
         del field_dictionary['range']
 
         if range_val == 'i':
@@ -123,18 +124,6 @@ def course_discovery_search(search_term=None, size=20, from_=0, field_dictionary
     searcher = SearchEngine.get_search_engine(getattr(settings, "COURSEWARE_INDEX_NAME", "courseware_index"))
     if not searcher:
         raise NoSearchEngineError("No search engine specified in settings.SEARCH_ENGINE")
-
-    log.info('111 ###################################### course_discovery_search ###################################### >>>>>>>>')
-    log.info(type(use_field_dictionary))
-    log.info('--------------------------------------------------------------------------------------------------------------')
-    log.info(use_field_dictionary.get('classfy'))
-    log.info(use_field_dictionary.get('middle_classfy'))
-    log.info('--------------------------------------------------------------------------------------------------------------')
-    log.info(use_field_dictionary)
-    log.info('222 ###################################### course_discovery_search ###################################### <<<<<<<<')
-
-    classfysub = None
-    middle_classfysub = None
 
     results = searcher.search(
         query_string=search_term,

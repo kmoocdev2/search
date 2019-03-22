@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ Elastic Search implementation for courseware search index """
 import copy
 import logging
@@ -627,14 +628,14 @@ class ElasticSearchEngine(SearchEngine):
 
         body = {"query": query}
 
-        # log.info('body ------------------ s')
-        # log.info(body)
-        # log.info('body ------------------ e')
-
         if facet_terms:
             facet_query = _process_facet_terms(facet_terms)
             if facet_query:
                 body["facets"] = facet_query
+
+        # log.info('body ------------------ s')
+        # log.info(body)
+        # log.info('body ------------------ e')
 
         try:
             es_response = self._es.search(
