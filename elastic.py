@@ -549,7 +549,8 @@ class ElasticSearchEngine(SearchEngine):
         if query_string:
             elastic_queries.append({
                 "query_string": {
-                    "fields": ["content.*"],
+                    # "fields": ["content.*"],
+                    "fields": ["display_name^4", "short_description^2", "number", "teacher_name", "org_kname", "org_ename"],
                     "query": query_string.encode('utf-8').translate(None, RESERVED_CHARACTERS)
                 }
             })
@@ -633,9 +634,9 @@ class ElasticSearchEngine(SearchEngine):
             if facet_query:
                 body["facets"] = facet_query
 
-        # log.info('body ------------------ s')
-        # log.info(body)
-        # log.info('body ------------------ e')
+        log.info('body ------------------------------------------------------------------------ s')
+        log.info(body)
+        log.info('body ------------------------------------------------------------------------ e')
 
         try:
             es_response = self._es.search(

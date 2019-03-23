@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ba944484-3e28-48b1-a9ec-ee0ee5f707ee" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/api.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/elastic.py" beforeDir="false" afterPath="$PROJECT_DIR$/elastic.py" afterDir="false" />
     </list>
@@ -15,31 +16,31 @@
     <session id="1123270769">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="4" />
-          <entry key="project.open.time.0" value="3" />
+          <entry key="project.closed" value="5" />
+          <entry key="project.open.time.0" value="4" />
           <entry key="project.open.time.3" value="1" />
           <entry key="project.open.time.4" value="1" />
-          <entry key="project.opened" value="5" />
+          <entry key="project.opened" value="6" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="py" value="6" />
+          <entry key="py" value="8" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="Python" value="6" />
+          <entry key="Python" value="8" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="py" value="2601" />
+          <entry key="py" value="3146" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Python" value="2601" />
+          <entry key="Python" value="3146" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.vcs.git.usages">
@@ -51,25 +52,31 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/api.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="708">
-              <caret line="149" column="46" lean-forward="true" selection-start-line="149" selection-start-column="46" selection-end-line="149" selection-end-column="46" />
-              <folding>
-                <element signature="e#69#98#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="135">
+              <caret line="9" column="28" lean-forward="true" selection-start-line="9" selection-start-column="28" selection-end-line="9" selection-end-column="28" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/urls.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="150">
+              <caret line="13" column="46" selection-start-line="13" selection-start-column="46" selection-end-line="13" selection-end-column="46" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/elastic.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="425">
-              <caret line="531" column="13" lean-forward="true" selection-start-line="531" selection-start-column="13" selection-end-line="531" selection-end-column="13" />
+            <state relative-caret-position="153">
+              <caret line="531" column="17" lean-forward="true" selection-start-line="531" selection-start-column="17" selection-end-line="531" selection-end-column="17" />
               <folding>
-                <element signature="e#66#77#0" expanded="true" />
+                <element signature="e#90#101#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -78,8 +85,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="279">
-              <caret line="213" column="13" lean-forward="true" selection-start-line="213" selection-start-column="13" selection-end-line="213" selection-end-column="13" />
+            <state relative-caret-position="558">
+              <caret line="58" column="12" selection-start-line="58" selection-start-column="12" selection-end-line="58" selection-end-column="12" />
               <folding>
                 <element signature="e#214#228#0" expanded="true" />
               </folding>
@@ -91,37 +98,40 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>replac</find>
-      <find>','</find>
-      <find>index</find>
-      <find>bulk</find>
-      <find>def bulk</find>
-      <find>range</find>
-      <find>&gt;&gt;&gt;</find>
-      <find>field_dictionary=</find>
-      <find>classfysu</find>
-      <find>es query</find>
-      <find>bool</find>
-      <find>match_all</find>
-      <find>course_discovery_search #######################</find>
-      <find>not exists</find>
-      <find>log.info</find>
-      <find>field_dictionary</find>
-      <find>&quot;must&quot;</find>
-      <find>&quot;must</find>
-      <find>elastic_filters</find>
-      <find>wildc</find>
-      <find>query_string</find>
-      <find>elastic_filters is True</find>
-      <find>elastic_queries</find>
-      <find>query</find>
-      <find>query_segment</find>
-      <find>query_segment =</find>
-      <find>search_term</find>
+      <find>COURSE_DISCOVERY_FILTERS</find>
+      <find>DEFAULT_FILTER_FIELDS</find>
+      <find>log.</find>
+      <find>pagepos</find>
+      <find>&quot;</find>
       <find>facet</find>
-      <find>filter_segment</find>
-      <find>extend</find>
+      <find>course_discovery_facets</find>
+      <find>facet_terms</find>
+      <find>field_dictionary ######################################</find>
+      <find>course_discovery_search</find>
+      <find>course_discovery_search(</find>
+      <find>search_reindex</find>
+      <find>range'</find>
+      <find>field_dictionary</find>
+      <find>fourth</find>
+      <find>range</find>
+      <find>or&quot;</find>
+      <find>should</find>
+      <find>&quot;must</find>
+      <find>_es</find>
+      <find>display</find>
+      <find>^4</find>
+      <find>c</find>
+      <find>search_string</find>
+      <find>4^</find>
+      <find>^</find>
+      <find>fields&quot;</find>
+      <find>fourth_industry_yn</find>
+      <find>log.info</find>
+      <find>course_level</find>
     </findStrings>
+    <replaceStrings>
+      <replace>'</replace>
+    </replaceStrings>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -135,8 +145,9 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/views.py" />
-        <option value="$PROJECT_DIR$/api.py" />
         <option value="$PROJECT_DIR$/elastic.py" />
+        <option value="$PROJECT_DIR$/api.py" />
+        <option value="$PROJECT_DIR$/filter_generator.py" />
       </list>
     </option>
   </component>
@@ -146,7 +157,7 @@
     <detection-done>true</detection-done>
     <sorting>DEFINITION_ORDER</sorting>
   </component>
-  <component name="ProjectFrameBounds">
+  <component name="ProjectFrameBounds" extendedState="1">
     <option name="y" value="23" />
     <option name="width" value="1920" />
     <option name="height" value="1003" />
@@ -157,6 +168,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -168,7 +180,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -204,10 +215,10 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="1920" height="1003" extended-state="0" />
+    <frame x="0" y="23" width="1920" height="1003" extended-state="1" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.17891374" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.18051118" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -238,40 +249,44 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/filter_generator.py">
+    <entry file="file://$PROJECT_DIR$/urls.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="375">
-          <caret line="29" column="8" selection-start-line="29" selection-start-column="8" selection-end-line="29" selection-end-column="8" />
+        <state relative-caret-position="150">
+          <caret line="13" column="46" selection-start-line="13" selection-start-column="46" selection-end-line="13" selection-end-column="46" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/views.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="279">
-          <caret line="213" column="13" lean-forward="true" selection-start-line="213" selection-start-column="13" selection-end-line="213" selection-end-column="13" />
+        <state relative-caret-position="558">
+          <caret line="58" column="12" selection-start-line="58" selection-start-column="12" selection-end-line="58" selection-end-column="12" />
           <folding>
             <element signature="e#214#228#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/api.py">
+    <entry file="file://$PROJECT_DIR$/elastic.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="708">
-          <caret line="149" column="46" lean-forward="true" selection-start-line="149" selection-start-column="46" selection-end-line="149" selection-end-column="46" />
+        <state relative-caret-position="153">
+          <caret line="531" column="17" lean-forward="true" selection-start-line="531" selection-start-column="17" selection-end-line="531" selection-end-column="17" />
           <folding>
-            <element signature="e#69#98#0" expanded="true" />
+            <element signature="e#90#101#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/elastic.py">
+    <entry file="file://$PROJECT_DIR$/filter_generator.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="425">
-          <caret line="531" column="13" lean-forward="true" selection-start-line="531" selection-start-column="13" selection-end-line="531" selection-end-column="13" />
-          <folding>
-            <element signature="e#66#77#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="450">
+          <caret line="34" column="8" selection-start-line="34" selection-start-column="8" selection-end-line="34" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/api.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="135">
+          <caret line="9" column="28" lean-forward="true" selection-start-line="9" selection-start-column="28" selection-end-line="9" selection-end-column="28" />
         </state>
       </provider>
     </entry>

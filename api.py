@@ -14,7 +14,7 @@ import json
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 # Default filters that we support, override using COURSE_DISCOVERY_FILTERS setting if desired
-DEFAULT_FILTER_FIELDS = ['org', 'language', 'modes', 'classfy', 'middle_classfy', 'linguistics', 'course_period', 'fourth_industry_yn', 'job_edu_yn', 'linguistics', 'range']
+DEFAULT_FILTER_FIELDS = ['org', 'language', 'modes', 'classfy', 'middle_classfy', 'linguistics', 'course_period', 'fourth_industry_yn', 'job_edu_yn', 'linguistics', 'range', 'etc', 'course_level']
 
 
 def course_discovery_filter_fields():
@@ -61,8 +61,6 @@ def perform_search(
     if not searcher:
         raise NoSearchEngineError("No search engine specified in settings.SEARCH_ENGINE")
 
-    log.info('@@@ perform_search call!')
-
     results = searcher.search_string(
         search_term,
         field_dictionary=field_dictionary,
@@ -91,13 +89,30 @@ def course_discovery_search(search_term=None, size=20, from_=0, field_dictionary
     # dictionary, and use our own logic upon enrollment dates for these
     # use_search_fields = ["org"]
     use_search_fields = ["org", "language", "modes", 'classfy', 'middle_classfy', 'classfysub', 'middle_classfysub', 'linguistics', 'range', 'course_period', 'start', 'org_kname', 'org_ename', 'teacher_name',
-                         'fourth_industry_yn', 'job_edu_yn']
+                         'fourth_industry_yn', 'job_edu_yn', 'etc', 'course_level']
 
     (search_fields, _, exclude_dictionary) = SearchFilterGenerator.generate_field_filters()
     use_field_dictionary = {}
     use_field_dictionary.update({field: search_fields[field] for field in search_fields if field in use_search_fields})
 
     # for kmooc ------------------------------------------------------------------ s
+
+    log.info('field_dictionary --------------------------- s')
+    log.info(field_dictionary)
+    # {u'etc': u'linguistics_y'}
+    log.info('field_dictionary --------------------------- e')
+    if 'etc' in field_dictionary:
+        if field_dictionary['etc'] == 'fourth_industry_y':
+            field_dictionary['fourth_industry_yn'] = 'Y'
+
+        if field_dictionary['etc'] == 'job_edu_y':
+            field_dictionary['job_edu_yn'] = 'Y'
+
+        if field_dictionary['etc'] == 'linguistics_y':
+            field_dictionary['linguistics'] = 'Y'
+
+        del field_dictionary['etc']
+
     if 'range' in field_dictionary:
         range_val = field_dictionary['range']
         del field_dictionary['range']
