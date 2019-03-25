@@ -635,9 +635,10 @@ class ElasticSearchEngine(SearchEngine):
                 body["facets"] = facet_query
 
         # sort update
-        kwargs.update({
-            'sort': '_score:desc,enrollment_start:desc,start:desc,enrollment_end:desc,end:desc,display_name:asc'
-        })
+        if 'size' in kwargs:
+            kwargs.update({
+                'sort': '_score:desc,enrollment_start:desc,start:desc,enrollment_end:desc,end:desc,display_name:asc'
+            })
 
         # log.info('body ------------------------------------------------------------------------ s ')
         # log.info(kwargs)
