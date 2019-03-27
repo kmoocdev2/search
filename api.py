@@ -14,7 +14,7 @@ import json
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 # Default filters that we support, override using COURSE_DISCOVERY_FILTERS setting if desired
-DEFAULT_FILTER_FIELDS = ['org', 'language', 'modes', 'classfy', 'middle_classfy', 'linguistics', 'course_period', 'fourth_industry_yn', 'job_edu_yn', 'linguistics', 'range', 'etc', 'course_level']
+DEFAULT_FILTER_FIELDS = ['org', 'language', 'modes', 'classfy', 'middle_classfy', 'linguistics', 'course_period', 'fourth_industry_yn', 'job_edu_yn', 'range', 'etc', 'course_level']
 
 
 def course_discovery_filter_fields():
@@ -101,17 +101,17 @@ def course_discovery_search(search_term=None, size=20, from_=0, field_dictionary
     log.info(field_dictionary)
     # {u'etc': u'linguistics_y'}
     log.info('field_dictionary --------------------------- e')
-    if 'etc' in field_dictionary:
-        if field_dictionary['etc'] == 'fourth_industry_y':
-            field_dictionary['fourth_industry_yn'] = 'Y'
+    if 'fourth_industry_yn' in field_dictionary:
+        log.info('fourth_industry_yn update')
+        field_dictionary['fourth_industry_yn'] = 'Y'
 
-        if field_dictionary['etc'] == 'job_edu_y':
-            field_dictionary['job_edu_yn'] = 'Y'
+    if 'job_edu_yn' in field_dictionary:
+        log.info('job_edu_yn update')
+        field_dictionary['job_edu_yn'] = 'Y'
 
-        if field_dictionary['etc'] == 'linguistics_y':
-            field_dictionary['linguistics'] = 'Y'
-
-        del field_dictionary['etc']
+    if 'linguistics' in field_dictionary:
+        log.info('linguistics update')
+        field_dictionary['linguistics'] = 'Y'
 
     if 'range' in field_dictionary:
         range_val = field_dictionary['range']
