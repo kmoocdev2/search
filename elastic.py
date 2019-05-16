@@ -535,8 +535,11 @@ class ElasticSearchEngine(SearchEngine):
 
         log.debug("searching index with %s", query_string)
 
-        del field_dictionary['classfy']
-        del field_dictionary['middle_classfy']
+        if classfysub:
+            del field_dictionary['classfy']
+
+        if middle_classfysub:
+            del field_dictionary['middle_classfy']
 
         elastic_queries = []
         elastic_filters = []
