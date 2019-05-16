@@ -535,12 +535,8 @@ class ElasticSearchEngine(SearchEngine):
 
         log.debug("searching index with %s", query_string)
 
-        # 융복합 검색을 위해 classfy, middle_classfy 의 must 검색이 안되도록 하고 should 검색을 추가
-        if classfysub:
-            del field_dictionary['classfy']
-
-        if middle_classfysub:
-            del field_dictionary['middle_classfy']
+        del field_dictionary['classfy']
+        del field_dictionary['middle_classfy']
 
         elastic_queries = []
         elastic_filters = []
@@ -575,6 +571,26 @@ class ElasticSearchEngine(SearchEngine):
         if exclude_dictionary:
             elastic_filters.append(_process_exclude_dictionary(exclude_dictionary))
 
+        if classfysub:
+            elastic_filters.append({
+                "bool": {
+                    "should": [
+                        {"term": {"classfy": classfysub}},
+                        {"term": {"classfysub": classfysub}}
+                    ]
+                }
+            })
+
+        if middle_classfysub:
+            elastic_filters.append({
+                "bool": {
+                    "should": [
+                        {"term": {"middle_classfy": middle_classfysub}},
+                        {"term": {"middle_classfysub": middle_classfysub}}
+                    ]
+                }
+            })
+
         query_segment = {
             "match_all": {}
         }
@@ -607,25 +623,6 @@ class ElasticSearchEngine(SearchEngine):
                     {"term": {"catalog_visibility": "about"}}
                 ]
             })
-
-            should_list = list()
-
-            if classfysub:
-                should_list.extend([
-                    {"term": {"classfy": classfysub}},
-                    {"term": {"classfysub": classfysub}}
-                ])
-
-            if middle_classfysub:
-                should_list.extend([
-                    {"term": {"middle_classfy": middle_classfysub}},
-                    {"term": {"middle_classfysub": middle_classfysub}}
-                ])
-
-            if should_list:
-                filter_segment['bool'].update({
-                    "should": should_list
-                })
 
         body = {"query": query}
 
